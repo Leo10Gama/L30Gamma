@@ -9,8 +9,8 @@ client.on('ready', () => {
 });
 
 //Create global variables
-const cats = ["ollie", "mushu"];
-const catsLength = [23, 8];
+const cats = ["ollie", "mushu", "achilles", "luna", "winter"];
+const catsLength = [23, 8, 5, 8, 6];
 const commandList = ["cat", "help", "piglatin", "speak"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
@@ -53,6 +53,15 @@ client.on('message', msg => {
               break;
             case (commands.substr(0,5) == "mushu"):
               msg.channel.send("Presenting... Mushu!", {files: ["./cats/" + cats[1] + "/" + Math.floor(Math.random() * catsLength[1]) + ".jpg"]});
+              break;
+            case (commands.substr(0,8) == "achilles"):
+              msg.channel.send("Presenting... Achilles!", {files: ["./cats/" + cats[2] + "/" + Math.floor(Math.random() * catsLength[2]) + ".jpg"]});
+              break;
+            case (commands.substr(0,4) == "luna"):
+              msg.channel.send("Presenting... Luna!", {files: ["./cats/" + cats[3] + "/" + Math.floor(Math.random() * catsLength[3]) + ".jpg"]});
+              break;
+            case (commands.substr(0,6) == "winter"):
+              msg.channel.send("Presenting... Winter!", {files: ["./cats/" + cats[4] + "/" + Math.floor(Math.random() * catsLength[4]) + ".jpg"]});
               break;
             //Show me any kitty
             default:
