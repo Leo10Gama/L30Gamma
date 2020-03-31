@@ -8,9 +8,17 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
+//Bot commands to listen for messages
 client.on('message', msg => {
-    if (msg.content === 'ping') {
-      msg.reply('pong');
+  //Bot prefix (g. or G.)
+    if (msg.content.substr(0,2) === 'g.' || msg.content.substr(0,2) === 'G.') {
+      //Remove whitespace, all lowercase
+      var commands = (msg.content.toLowerCase().replace(' ', '')).substr(2);
+
+      //Ping command
+      if (commands.substr(0,4) == "ping") {
+        msg.channel.send('Pong!');
+      }
     }
   });
 

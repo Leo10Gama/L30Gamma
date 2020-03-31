@@ -1,7 +1,6 @@
 {
   "name": "L30Gamma",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,5 +11,15 @@
   "dependencies": {
     "discord.js": "^12.1.1",
     "dotenv": "^8.2.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leo10Gama/L30Gamma.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Leo10Gama/L30Gamma/issues"
+  },
+  "homepage": "https://github.com/Leo10Gama/L30Gamma#readme",
+  "description": ""
 }
