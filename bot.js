@@ -14,10 +14,12 @@ client.on('ready', () => {
 //Create global variables
 const cats = ["ollie", "mushu", "achilles", "luna", "winter"];
 const catsLength = [23, 8, 5, 8, 6];
-const commandList = ["cat", "help", "piglatin", "speak"];
+const maths = ["+","-","*","/","%","^"];
+const commandList = ["cat", "help", "math", "piglatin", "speak"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
 "Well, I'm sure you know what this command does since you called it just now, huh",
+"Do a basic math operation! Right now, I can only handle single expressons (i.e. 4 + 6)",
 "Convert a sentence to pig latin",
 "I can hold some really good conversation if you want to talk with me for a while"];
 
@@ -51,22 +53,12 @@ client.on('message', msg => {
               msg.channel.send(returnValue);
               break;
             //I want to see a specific kitty!
-            case (commands.substr(0,5) == "ollie"):
-              msg.channel.send("Presenting... Ollie!", {files: ["./cats/" + cats[0] + "/" + Math.floor(Math.random() * catsLength[0]) + ".jpg"]});
+            case (cats.indexOf(commands.trim()) > -1):
+              var cat2send = cats.indexOf(commands.trim());
+              msg.channel.send("cat index: " + cat2send);
+              msg.channel.send("Presenting... " + cats[cat2send].charAt(0).toUpperCase() + cats[cat2send].slice(1) + "!",
+                {files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"]});
               break;
-            case (commands.substr(0,5) == "mushu"):
-              msg.channel.send("Presenting... Mushu!", {files: ["./cats/" + cats[1] + "/" + Math.floor(Math.random() * catsLength[1]) + ".jpg"]});
-              break;
-            case (commands.substr(0,8) == "achilles"):
-              msg.channel.send("Presenting... Achilles!", {files: ["./cats/" + cats[2] + "/" + Math.floor(Math.random() * catsLength[2]) + ".jpg"]});
-              break;
-            case (commands.substr(0,4) == "luna"):
-              msg.channel.send("Presenting... Luna!", {files: ["./cats/" + cats[3] + "/" + Math.floor(Math.random() * catsLength[3]) + ".jpg"]});
-              break;
-            case (commands.substr(0,6) == "winter"):
-              msg.channel.send("Presenting... Winter!", {files: ["./cats/" + cats[4] + "/" + Math.floor(Math.random() * catsLength[4]) + ".jpg"]});
-              break;
-            //Show me any kitty
             default:
               var cat2send = Math.floor(Math.random() * cats.length);
               msg.channel.send("Presenting... " + cats[cat2send].charAt(0).toUpperCase() + cats[cat2send].slice(1) + "!",
@@ -116,6 +108,47 @@ client.on('message', msg => {
             returnValue += pigLatin(phrase[i]) + " ";
           }
           msg.channel.send(returnValue);
+          break;
+          
+        //Math command
+        case (commands.substr(0,4).toLowerCase() == "math"):
+          //Shorten message to mathematic expression
+          var expression = commands.slice(5).trim();
+          //Figure out what operation we're doing
+          var operation;
+          var nums;
+          for(var i=0; i<expression.length; i++) {
+            if(maths.indexOf(expression.charAt(i)) > -1) {
+              operation = expression.charAt(i);
+              nums = expression.split(expression.charAt(i));
+            }
+          }
+          if(nums.length == 2) {
+            switch(operation) {
+              case maths[0]:
+                msg.channel.send(parseInt(nums[0]) + parseInt(nums[1]));
+                break;
+              case maths[1]:
+                msg.channel.send(parseInt(nums[0]) - parseInt(nums[1]));
+                break;
+              case maths[2]:
+                msg.channel.send(parseInt(nums[0]) * parseInt(nums[1]));
+                break;
+              case maths[3]:
+                msg.channel.send(parseInt(nums[0]) / parseInt(nums[1]));
+                break;
+              case maths[4]:
+                msg.channel.send(parseInt(nums[0]) % parseInt(nums[1]));
+                break;
+              case maths[5]:
+                msg.channel.send(Math.pow(parseInt(nums[0]), parseInt(nums[1])));
+                break;
+              default:
+                msg.channel.send("Whoopsies, something happened that shouldn't've happened...");
+                break;
+            }
+          }
+          break;
       }        
     }
 });
