@@ -6,6 +6,9 @@ const client = new Discord.Client();
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    //Send wakeup message to specified channels
+    client.channels.cache.get('694692219562754108').send("Nyaa~ waking up from a quick cat nap");
+    client.channels.cache.get('694662666190323812').send("Nyaa~ waking up from a quick cat nap");
 });
 
 //Create global variables
