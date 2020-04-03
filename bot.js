@@ -4,17 +4,24 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+module.exports.run = async(client, message, args) => {}
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     //Send wakeup message to specified channels
-    client.channels.cache.get('694692219562754108').send("Nyaa~ waking up from a quick cat nap");
+    // client.channels.cache.get('694692219562754108').send("Nyaa~ waking up from a quick cat nap");
+
+    //This is the wakeup message for my personal server so I can test
     client.channels.cache.get('694662666190323812').send("Nyaa~ waking up from a quick cat nap");
 });
+
 
 //Create global variables
 const cats = ["ollie", "mushu", "achilles", "luna", "winter"];
 const catsLength = [23, 8, 5, 8, 6];
 const maths = ["+","-","*","/","%","^"];
+const deck = ["A♠","A♥","A♦","A♣","2♠","2♥","2♦","2♣","3♠","3♥","3♦","3♣","4♠","4♥","4♦","4♣","5♠","5♥","5♦","5♣","6♠","6♥","6♦","6♣","7♠","7♥","7♦","7♣",
+"8♠","8♥","8♦","8♣","9♠","9♥","9♦","9♣","10♠","10♥","10♦","10♣","J♠","J♥","J♦","J♣","Q♠","Q♥","Q♦","Q♣","K♠","K♥","K♦","K♣"];
 const commandList = ["cat", "help", "math", "piglatin", "speak"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
@@ -24,7 +31,8 @@ const commandHelp = [
 "I can hold some really good conversation if you want to talk with me for a while"];
 
 //Bot commands to listen for messages
-client.on('message', msg => {
+client.on('message', async msg => {
+  const filter = response => {return response.author.id === msg.author.id};
   //Bot prefix (g. or G.)
     if (msg.content.substr(0,2) === 'g.' || msg.content.substr(0,2) === 'G.') {
       //Remove whitespace, all lowercase
@@ -59,6 +67,7 @@ client.on('message', msg => {
               msg.channel.send("Presenting... " + cats[cat2send].charAt(0).toUpperCase() + cats[cat2send].slice(1) + "!",
                 {files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"]});
               break;
+            //Generate random cat from current list
             default:
               var cat2send = Math.floor(Math.random() * cats.length);
               msg.channel.send("Presenting... " + cats[cat2send].charAt(0).toUpperCase() + cats[cat2send].slice(1) + "!",
@@ -123,30 +132,34 @@ client.on('message', msg => {
               nums = expression.split(expression.charAt(i));
             }
           }
-          if(nums.length == 2) {
-            switch(operation) {
-              case maths[0]:
-                msg.channel.send(parseInt(nums[0]) + parseInt(nums[1]));
-                break;
-              case maths[1]:
-                msg.channel.send(parseInt(nums[0]) - parseInt(nums[1]));
-                break;
-              case maths[2]:
-                msg.channel.send(parseInt(nums[0]) * parseInt(nums[1]));
-                break;
-              case maths[3]:
-                msg.channel.send(parseInt(nums[0]) / parseInt(nums[1]));
-                break;
-              case maths[4]:
-                msg.channel.send(parseInt(nums[0]) % parseInt(nums[1]));
-                break;
-              case maths[5]:
-                msg.channel.send(Math.pow(parseInt(nums[0]), parseInt(nums[1])));
-                break;
-              default:
-                msg.channel.send("Whoopsies, something happened that shouldn't've happened...");
-                break;
+          try {
+            if(nums.length == 2) {
+              switch(operation) {
+                case maths[0]:
+                  msg.channel.send(parseInt(nums[0]) + parseInt(nums[1]));
+                  break;
+                case maths[1]:
+                  msg.channel.send(parseInt(nums[0]) - parseInt(nums[1]));
+                  break;
+                case maths[2]:
+                  msg.channel.send(parseInt(nums[0]) * parseInt(nums[1]));
+                  break;
+                case maths[3]:
+                  msg.channel.send(parseInt(nums[0]) / parseInt(nums[1]));
+                  break;
+                case maths[4]:
+                  msg.channel.send(parseInt(nums[0]) % parseInt(nums[1]));
+                  break;
+                case maths[5]:
+                  msg.channel.send(Math.pow(parseInt(nums[0]), parseInt(nums[1])));
+                  break;
+                default:
+                  msg.channel.send("Whoopsies, something happened that shouldn't've happened...");
+                  break;
+              }
             }
+          } catch(error) {
+            msg.channel.send("Enter an expression after g.math to use the function properly!!");
           }
           break;
       }        
@@ -187,4 +200,54 @@ function pigLatin(word) {
   } else {
     return (word + "yay").toLowerCase();
   }
+}
+
+//Shuffle an array
+function shuffle(a) {
+  for (var i=a.length - 1; i>0; i--) {
+    var j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+}
+
+//Count sum of points in hand
+function handValue(hand) {
+  //Map numeric values of the hand
+  var cardVal = hand.map(function(card) {
+    switch(card.charAt(0)) {
+      case "A":
+        return "A";
+      case "1":
+      case "J":
+      case "Q":
+      case "K":
+        return "10";
+      default:
+        return card.charAt(0);
+    }
+  })
+  //Sum the total *note that A will appear at the end due to sort function*
+  cardVal.sort();
+  var total = 0;
+  for(var i=0; i<cardVal.length; i++) {
+    if(cardVal[i] != "A") {
+      total += parseInt(cardVal[i]);
+    } else {
+      if (total <= 10) {
+        total += 11;
+      } else {
+        total += 1;
+      }
+    }
+  }
+  return total;
+}
+
+//List the cards in my hand
+function listHand(hand) {
+  var returnValue = "";
+  for(var i=0; i<hand.length; i++) {
+    returnValue += hand[i] + ", ";
+  }
+  return returnValue.substr(0,returnValue.length-2);
 }
