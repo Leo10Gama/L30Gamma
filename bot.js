@@ -179,22 +179,24 @@ client.on('message', async msg => {
         //Molar Mass command
         case (commands.substr(0,9).toLowerCase() == "molarmass"):
           try {
-            var inBrackets = commands.match(bracketPattern);
-            var compound = commands.slice(9).replace(bracketPattern, "");
-            var bracketsFormatted = inBrackets != null ? bracketFormat(inBrackets) : null;
-            var atoms = compound.match(atomPattern).concat(bracketsFormatted);
-            //Remove potential blank elements from array
-            atoms = atoms.filter(function (i) {
-              return i != null;
-            });
-            console.log("Current array of atoms: " + atoms);
-            //"atoms" is a string array containing a chemical symbol (H, Na, etc.), and potentially an integer
-            var totalMass = 0;
-            for(var i=0; i<atoms.length; i++) {
-              totalMass += atomMass(atoms[i]);
-              console.log("Current total mass: " + totalMass);
+            if (commands.slice(9).trim() != "") {
+              var inBrackets = commands.match(bracketPattern);
+              var compound = commands.slice(9).replace(bracketPattern, "");
+              var bracketsFormatted = inBrackets != null ? bracketFormat(inBrackets) : null;
+              var atoms = compound.match(atomPattern).concat(bracketsFormatted);
+              //Remove potential blank elements from array
+              atoms = atoms.filter(function (i) {
+                return i != null;
+              });
+              //"atoms" is a string array containing a chemical symbol (H, Na, etc.), and potentially an integer
+              var totalMass = 0;
+              for(var i=0; i<atoms.length; i++) {
+                totalMass += atomMass(atoms[i]);
+              }
+              msg.channel.send("The molar mass of the compound you entered is " + totalMass.toFixed(2) + " g/mol");
+            } else {
+              msg.channel.send("To use this command, enter a chemical compound! Remember that molecular formulas are case sensitive!!");
             }
-            msg.channel.send("The molar mass of the compound you entered is " + totalMass.toFixed(2) + " g/mol");
           } catch(error) {
             msg.channel.send("Couldn't complete operation. Are you sure that's a valid chemical formula?");
           }
@@ -264,12 +266,8 @@ function bracketFormat(inBrackets) {
 //Calculate the mass of atoms
 //Pre: a string is passed consisting of 1-3 letters and any amount of numbers; Post: an integer is returned
 function atomMass(atom) {
-  console.log("Within atom mass function");
   var key = atom.match(/[a-zA-Z]*/);
-  console.log("Key: " + key);
   var temp = atom.match(/\d+/);
-  console.log("Temporary n: " + temp);
   var n = (temp != null ? parseInt(temp[0]) : 1);
-  console.log("n: " + n);
   return parseFloat(atomicMasses.get(key[0]) * parseInt(n));
 }
