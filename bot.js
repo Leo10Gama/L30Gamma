@@ -49,7 +49,6 @@ const commandHelp = [
 
 //Bot commands to listen for messages
 client.on('message', async msg => {
-  const filter = response => {return response.author.id === msg.author.id};
   //Bot prefix (g. or G.)
     if (msg.content.substr(0,2) === 'g.' || msg.content.substr(0,2) === 'G.') {
       //Remove whitespace, all lowercase
@@ -117,12 +116,17 @@ client.on('message', async msg => {
 
         //Help command
         case (commands.substr(0,4).toLowerCase() == "help"):
-          var returnValue = "Here's a list of all the things I can do:\n";
-          for(var i=0; i<commandList.length; i++) {
-            returnValue += "`" + commandList[i] + "`: " + commandHelp[i] + "\n";
+          commands = commands.slice(4).trim().toLowerCase();
+          if(commands == "") {
+            var returnValue = "Here's a list of all the things I can do:\n";
+            for(var i=0; i<commandList.length; i++) {
+              returnValue += "`" + commandList[i] + "`: " + commandHelp[i] + "\n";
+            }
+            msg.channel.send(returnValue);
+          } else if(commandList.indexOf(commands > -1)) {
+            msg.channel.send(commandHelp[commandList.indexOf(commands)]);
           }
-          msg.channel.send(returnValue);
-        break;
+          break;
 
         //Pig Latin command
         case (commands.substr(0,8).toLowerCase() == "piglatin"):
