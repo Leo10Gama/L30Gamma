@@ -35,12 +35,13 @@ const atomicMasses = new Map([["H", 1.00797], ["He", 4.00260], ["Li", 6.941], ["
 ["U", 238.029], ["Pu", 242], ["Am", 243], ["Bk", 247], ["Cm", 247], ["Cf", 251], ["Es", 252], ["Mt", 278], ["Fm", 257], ["Md", 258],
 ["No", 259], ["Lr", 266], ["Rf", 267], ["Db", 268], ["Sg", 269], ["Bh", 270], ["Hs", 269], ["Ds", 281], ["Rg", 282], ["Cn", 285], ["Nh", 286], ["Fl", 289],
 ["Mc", 290], ["Lv", 293], ["Ts", 294], ["Og", 294]]);
-const commandList = ["cat", "help", "math", "molarmass", "piglatin", "speak"];
+const commandList = ["cat", "help", "math", "molarmass", "palindrome", "piglatin", "speak"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
 "Well, I'm sure you know what this command does since you called it just now, huh",
 "Do a basic math operation! Right now, I can only handle single expressons (i.e. 4 + 6)",
 "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
+"Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
 "Convert a sentence to pig latin",
 "I can hold some really good conversation if you want to talk with me for a while"];
 
