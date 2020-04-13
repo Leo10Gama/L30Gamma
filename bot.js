@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const weather = require('weather-js');
 
 module.exports.run = async(client, message, args) => {}
 
@@ -35,7 +36,7 @@ const atomicMasses = new Map([["H", 1.00797], ["He", 4.00260], ["Li", 6.941], ["
 ["U", 238.029], ["Pu", 242], ["Am", 243], ["Bk", 247], ["Cm", 247], ["Cf", 251], ["Es", 252], ["Mt", 278], ["Fm", 257], ["Md", 258],
 ["No", 259], ["Lr", 266], ["Rf", 267], ["Db", 268], ["Sg", 269], ["Bh", 270], ["Hs", 269], ["Ds", 281], ["Rg", 282], ["Cn", 285], ["Nh", 286], ["Fl", 289],
 ["Mc", 290], ["Lv", 293], ["Ts", 294], ["Og", 294]]);
-const commandList = ["cat", "help", "math", "molarmass", "palindrome", "piglatin", "speak"];
+const commandList = ["cat", "help", "math", "molarmass", "palindrome", "piglatin", "speak", "weather"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
 "Well, I'm sure you know what this command does since you called it just now, huh",
@@ -43,7 +44,8 @@ const commandHelp = [
 "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
 "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
 "Convert a sentence to pig latin",
-"I can hold some really good conversation if you want to talk with me for a while"];
+"I can hold some really good conversation if you want to talk with me for a while",
+"Enter a city and I'll let you know what the weather there is like right now"];
 
 //Bot commands to listen for messages
 client.on('message', async msg => {
@@ -208,6 +210,35 @@ client.on('message', async msg => {
         case (commands.substr(0,10).toLowerCase() == "palindrome"):
           var word = commands.slice(10).toLowerCase().trim();
           msg.channel.send(isPalindrome(word) ? "This is a palindrome" : "This isn't a palindrome");
+          break;
+
+        //Weather command
+        case(commands.substr(0,7).toLowerCase() == "weather"):
+          var location = commands.slice(7);
+          weather.find({search: location, degreeType: 'C'}, function(err, result) {
+            if(err) msg.channel.send("Something went wrong");
+            if(result.length == 0) {
+              msg.channel.send("Please enter a valid location");
+              return;
+            }
+            //Get the current weather info
+            var current = result[0].current;
+            //Put the results in an embed so it looks prettier
+            const embed = new Discord.MessageEmbed()
+              .setDescription("**"+current.skytext+"**")
+              .setAuthor("Weather at "+current.observationpoint)
+              .setThumbnail(current.imageUrl)
+              .setColor("0099ff")
+              .addFields(
+                {name: "Temperature", value: current.temperature + "\xB0C", inline: true},
+                {name: "Feels like", value: current.feelslike + "\xB0C", inline: true},
+                {name: "Humidity", value: current.humidity + "%", inline: true},
+                {name: "Winds", value: current.winddisplay, inline: true}
+              )
+              .setFooter("Weather as of " + current.observationtime + " on " + current.date);
+            msg.channel.send({embed});
+          })
+          break;
       }        
     }
 });
