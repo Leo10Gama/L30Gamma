@@ -176,6 +176,7 @@ client.on('message', async msg => {
             msg.channel.send("Enter an expression after g.math to use the function properly!!");
           }
           break;
+
         //Molar Mass command
         case (commands.substr(0,9).toLowerCase() == "molarmass"):
           try {
@@ -201,6 +202,11 @@ client.on('message', async msg => {
             msg.channel.send("Couldn't complete operation. Are you sure that's a valid chemical formula?");
           }
           break;
+
+        //Palindrome command
+        case (commands.substr(0,10).toLowerCase() == "palindrome"):
+          var word = commands.slice(10).toLowerCase().trim();
+          msg.channel.send(isPalindrome(word) ? "This is a palindrome" : "This isn't a palindrome");
       }        
     }
 });
@@ -270,4 +276,17 @@ function atomMass(atom) {
   var temp = atom.match(/\d+/);
   var n = (temp != null ? parseInt(temp[0]) : 1);
   return parseFloat(atomicMasses.get(key[0]) * parseInt(n));
+}
+
+
+//For palindrome
+//Pre: A string is passed and checked if the reverse is the same as the forward
+function isPalindrome(word) {
+  var returnValue = true;
+  for(var i=0; i<word.length/2; i++) {
+    if(word.charAt(i) != word.charAt(word.length - 1 - i)) {
+      returnValue = false;
+    }
+  }
+  return returnValue;
 }
