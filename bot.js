@@ -36,6 +36,8 @@ const atomicMasses = new Map([["H", 1.00797], ["He", 4.00260], ["Li", 6.941], ["
 ["U", 238.029], ["Pu", 242], ["Am", 243], ["Bk", 247], ["Cm", 247], ["Cf", 251], ["Es", 252], ["Mt", 278], ["Fm", 257], ["Md", 258],
 ["No", 259], ["Lr", 266], ["Rf", 267], ["Db", 268], ["Sg", 269], ["Bh", 270], ["Hs", 269], ["Ds", 281], ["Rg", 282], ["Cn", 285], ["Nh", 286], ["Fl", 289],
 ["Mc", 290], ["Lv", 293], ["Ts", 294], ["Og", 294]]);
+const PHI = (1 + Math.sqrt(5)) / 2;
+const PSI = -Math.pow(PHI, -1);
 const commandList = ["cat", "help", "math", "molarmass", "palindrome", "piglatin", "speak", "sum", "weather"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
@@ -250,6 +252,12 @@ client.on('message', async msg => {
           var things2sum = commands.slice(3).split(" ");
           msg.channel.send("The sum is " + sumThing(things2sum.map(Number)));
           break;
+
+        //Fibonacci command
+        case(commands.substr(0,9).toLowerCase() == "fibonacci"):
+          var n = parseInt(commands.slice(9).trim());
+          msg.channel.send(fibonacci(n));
+          break;
       }        
     }
 });
@@ -345,4 +353,19 @@ function sumThing(items) {
     }
   }
   return total;
+}
+
+
+//For fibonacci command
+/*Normally, a fibonacci function would only return values for the first two terms of the sequence
+* and call on itself recursively to arrive at an answer. However, using the mathematical formula 
+* for the nth term is much faster. The only downside is its source of error, which occurs after 
+* the 70th term. To work around this, we can employ the more traditional fibonacci method to handle 
+* the larger cases, leading to a faster overall program*/
+function fibonacci(n) {
+  if(n<=70) {
+    return Math.round((Math.pow(PHI, n) - Math.pow(PSI, n)) / Math.sqrt(5)) ;
+  } else {
+    return fibonacci(n - 1) + fibonacci(n - 2);
+  }
 }
