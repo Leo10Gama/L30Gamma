@@ -38,9 +38,10 @@ const atomicMasses = new Map([["H", 1.00797], ["He", 4.00260], ["Li", 6.941], ["
 ["Mc", 290], ["Lv", 293], ["Ts", 294], ["Og", 294]]);
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PSI = -Math.pow(PHI, -1);
-const commandList = ["cat", "help", "math", "molarmass", "palindrome", "piglatin", "speak", "sum", "weather"];
+const commandList = ["cat", "fibonacci", "help", "math", "molarmass", "palindrome", "piglatin", "speak", "sum", "weather"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
+"I'll tell you the nth term of the fibonacci sequence",
 "Well, I'm sure you know what this command does since you called it just now, huh",
 "Do a basic math operation! Right now, I can only handle single expressons (i.e. 4 + 6)",
 "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
@@ -256,7 +257,11 @@ client.on('message', async msg => {
         //Fibonacci command
         case(commands.substr(0,9).toLowerCase() == "fibonacci"):
           var n = parseInt(commands.slice(9).trim());
-          msg.channel.send(fibonacci(n));
+          try {
+            msg.channel.send(fibonacci(n));
+          } catch(err) {
+            msg.channel.send("Please follow up the command with an integer!!");
+          }
           break;
       }        
     }
