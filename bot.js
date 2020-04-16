@@ -76,21 +76,20 @@ client.on('message', async msg => {
             case (commands.substr(0,4).toLowerCase() == "list"):
               var returnValue = "Current list of cats:\n";
               for(var i=0; i<cats.length; i++) {
-                returnValue += (cats[i].charAt(0).toUpperCase() + cats[i].slice(1) + "\n");
+                returnValue += (properWord(cats[i]) + "\n");
               }
               msg.channel.send(returnValue);
               break;
             //I want to see a specific kitty!
             case (cats.indexOf(commands.trim()) > -1):
               var cat2send = cats.indexOf(commands.trim());
-              msg.channel.send("cat index: " + cat2send);
-              msg.channel.send("Presenting... " + cats[cat2send].charAt(0).toUpperCase() + cats[cat2send].slice(1) + "!",
+              msg.channel.send("Presenting... " + properWord(cats[cat2send]) + "!",
                 {files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"]});
               break;
             //Generate random cat from current list
             default:
               var cat2send = Math.floor(Math.random() * cats.length);
-              msg.channel.send("Presenting... " + cats[cat2send].charAt(0).toUpperCase() + cats[cat2send].slice(1) + "!",
+              msg.channel.send("Presenting... " + properWord(cats[cat2send]) + "!",
                 {files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"]});
               break;
           }
@@ -301,6 +300,19 @@ function pigLatin(word) {
   } else {
     return (word + "yay").toLowerCase();
   }
+}
+
+//For cats (and maybe future application?)
+//Pre: A string in all lowercase; Post: Capitalize the first letter of that string
+function properWord(word) {
+  var thing2return = "";
+  if(word.charAt(0) >= 'a' && word.charAt(0) <= 'z') {
+    thing2return += word.charAt(0).toUpperCase();
+    thing2return += word.slice(1);
+  } else {
+    thing2return = word;
+  }
+  return thing2return;
 }
 
 
