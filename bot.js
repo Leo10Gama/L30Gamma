@@ -4,6 +4,8 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const weather = require('weather-js');
+const Pokedex = require('pokedex-promise-v2');
+const P = new Pokedex();
 
 module.exports.run = async(client, message, args) => {}
 
@@ -38,7 +40,7 @@ const atomicMasses = new Map([["H", 1.00797], ["He", 4.00260], ["Li", 6.941], ["
 ["Mc", 290], ["Lv", 293], ["Ts", 294], ["Og", 294]]);
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PSI = -Math.pow(PHI, -1);
-const commandList = ["cat", "fibonacci", "help", "math", "molarmass", "palindrome", "piglatin", "speak", "sum", "weather"];
+const commandList = ["cat", "fibonacci", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "speak", "sum", "weather"];
 const commandHelp = [
 "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
 "I'll tell you the nth term of the fibonacci sequence",
@@ -47,6 +49,7 @@ const commandHelp = [
 "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
 "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
 "Convert a sentence to pig latin",
+"Enter the name of a Pokemon and I'll give you information on that Pokemon",
 "I can hold some really good conversation if you want to talk with me for a while",
 "Enter a list of numbers and I'll sum them up for you",
 "Enter a city and I'll let you know what the weather there is like right now"];
@@ -76,20 +79,20 @@ client.on('message', async msg => {
             case (commands.substr(0,4).toLowerCase() == "list"):
               var returnValue = "Current list of cats:\n";
               for(var i=0; i<cats.length; i++) {
-                returnValue += (properWord(cats[i]) + "\n");
+                returnValue += (properCase(cats[i]) + "\n");
               }
               msg.channel.send(returnValue);
               break;
             //I want to see a specific kitty!
             case (cats.indexOf(commands.trim()) > -1):
               var cat2send = cats.indexOf(commands.trim());
-              msg.channel.send("Presenting... " + properWord(cats[cat2send]) + "!",
+              msg.channel.send("Presenting... " + properCase(cats[cat2send]) + "!",
                 {files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"]});
               break;
             //Generate random cat from current list
             default:
               var cat2send = Math.floor(Math.random() * cats.length);
-              msg.channel.send("Presenting... " + properWord(cats[cat2send]) + "!",
+              msg.channel.send("Presenting... " + properCase(cats[cat2send]) + "!",
                 {files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"]});
               break;
           }
@@ -262,6 +265,66 @@ client.on('message', async msg => {
             msg.channel.send("Please follow up the command with an integer!!");
           }
           break;
+
+        //Pokemon command
+        case(commands.substr(0,7).toLowerCase() == "pokemon"):
+          commands = commands.slice(7).toLowerCase().trim();
+          P.getPokemonByName(commands)
+            .then(function(pokemon) {
+              //Get all the proper values of the pokemon
+              var pkmnName = properCase(pokemon.name);
+              var pkmnId = pokemon.id;
+              var pkmnHeight = pokemon.height / 10; //Height in metres
+              var pkmnWeight = pokemon.weight / 10; //Weight in kilograms
+              var pkmnImage = pokemon.sprites.front_default;
+              //Pokemon's type(s) is an array with objects in reverse order
+              var pkmnTypes = [];
+              for(var i=0; i<pokemon.types.length; i++) {
+                pkmnTypes[i] = properCase(pokemon.types[i].type.name);
+              }
+              pkmnTypes = pkmnTypes.reverse().join("/");
+              //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
+              var pkmnAbilities = [];
+              var pkmnHiddenAbility = "None";
+              for(var i=0; i<pokemon.abilities.length; i++) {
+                if(!pokemon.abilities[i].is_hidden) {
+                  pkmnAbilities[i] = properCase(pokemon.abilities[i].ability.name);
+                } else {
+                  pkmnHiddenAbility = properCase(pokemon.abilities[i].ability.name);
+                }
+              }
+              pkmnAbilities = pkmnAbilities.filter(function(i) {
+                return i != null;
+              });
+              pkmnAbilities = pkmnAbilities.join("/");
+              //To access the genus of the pokemon we must use another command in the pokeapi
+              var pkmnGenus;
+              P.getPokemonSpeciesByName(commands)
+                .then(function(pokemonSpecies) {
+                  pkmnGenus = pokemonSpecies.genera[2].genus; //Index 2 of the genera array is the english translation
+                  //Now we must format all the information correctly in an embed to send
+                  const embed = new Discord.MessageEmbed()
+                    .setTitle(pkmnName)
+                    .setAuthor("Pokemon #" + pkmnId)
+                    .setDescription(pkmnGenus)
+                    .setThumbnail(pkmnImage)
+                    .addFields(
+                      {name: "Type", value: pkmnTypes, inline: true},
+                      {name: "Height", value: pkmnHeight + " m", inline: true},
+                      {name: "Weight", value: pkmnWeight + " kg", inline: true},
+                      {name: "Abilities", value: pkmnAbilities, inline: true},
+                      {name: "Hidden Ability", value: pkmnHiddenAbility, inline: true}
+                    );
+                  msg.channel.send(embed);
+                })
+                .catch(function(error) {
+                  msg.channel.send('There was an ERROR: ', error);
+                });
+            })
+            .catch(function(error) {
+              msg.channel.send('Invalid entry. Maybe you misspelt something?', error);
+            });
+          break;
       }        
     }
 });
@@ -304,7 +367,7 @@ function pigLatin(word) {
 
 //For cats (and maybe future application?)
 //Pre: A string in all lowercase; Post: Capitalize the first letter of that string
-function properWord(word) {
+function properCase(word) {
   var thing2return = "";
   if(word.charAt(0) >= 'a' && word.charAt(0) <= 'z') {
     thing2return += word.charAt(0).toUpperCase();
