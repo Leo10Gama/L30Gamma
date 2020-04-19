@@ -49,7 +49,7 @@ const commandHelp = [
 "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
 "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
 "Convert a sentence to pig latin",
-"Enter the name of a Pokemon and I'll give you information on that Pokemon! Follow up commands include: 'id'",
+"Enter the name of a Pokemon and I'll give you information on that Pokemon! Follow up commands include: 'id', 'info'",
 "I can hold some really good conversation if you want to talk with me for a while",
 "Enter a list of numbers and I'll sum them up for you",
 "Enter a city and I'll let you know what the weather there is like right now"];
@@ -338,6 +338,30 @@ client.on('message', async msg => {
                     response += 'In the `' + pokemon.pokedex_numbers[i].pokedex.name + '` pokedex, ' + properCase(pokemon.name) + ' is #`' + pokemon.pokedex_numbers[i].entry_number + '`\n';
                   }
                   msg.channel.send(response);
+                })
+                .catch(function(error) {
+                  msg.channel.send('Invalid entry. Maybe you misspelt something?', error);
+                });
+              break;
+            //Get some delicious, delicious flavour text (mmmm delicious)
+            /*Let it be known that this didnt compile the first time because the API spells it "flavor" and not "flavour"
+            * Truly a lesson in regional implementation */
+            case(commandsArray[1] == "info"):
+              P.getPokemonSpeciesByName(commandsArray[0])
+                .then(function(pokemon) {
+                  console.log(pokemon);
+                  var flavorText = [];
+                  var j = 0;
+                  for(var i=0; i<pokemon.flavor_text_entries.length; i++) {
+                    console.log("in for loop");
+                    //Only keep track of the entries that are english
+                    //Maybe in the future add additional command for other languages?
+                    if(pokemon.flavor_text_entries[i].language.name == 'en') {
+                      flavorText[j] = "```" + pokemon.flavor_text_entries[i].flavor_text + "\n~ PKMN " + properCase(pokemon.flavor_text_entries[i].version.name + "```");
+                      j++;
+                    }
+                  }
+                  msg.channel.send(flavorText[Math.floor(Math.random() * flavorText.length)]);
                 })
                 .catch(function(error) {
                   msg.channel.send('Invalid entry. Maybe you misspelt something?', error);
