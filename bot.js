@@ -3,6 +3,8 @@ require('dotenv').config();
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const proper = require('./properCase');
+const cat = require('./cat');
 const chem = require('./chemistry');
 const weather = require('weather-js');
 const Pokedex = require('pokedex-promise-v2');
@@ -21,8 +23,6 @@ client.on('ready', () => {
 
 
 //Create global constants
-const cats = ["ollie", "mushu", "achilles", "luna", "winter"];
-const catsLength = [23, 8, 5, 8, 6];
 const maths = ["+", "-", "*", "/", "%", "^"];
 const PHI = (1 + Math.sqrt(5)) / 2;
 const PSI = -Math.pow(PHI, -1);
@@ -58,28 +58,17 @@ client.on('message', async msg => {
       //Cat command
       case (commands.substr(0, 3).toLowerCase() == "cat"):
         //Ok we know we're doing the cat command so format to check for the next command
-        commands = commands.slice(4);
+        commands = commands.slice(4).toLowerCase().trim();
         //Check if a certain cat is wanted
         switch (true) {
           //List the kitties
           case (commands.substr(0, 4).toLowerCase() == "list"):
-            var returnValue = "Current list of cats:\n";
-            for (var i = 0; i < cats.length; i++) {
-              returnValue += (properCase(cats[i]) + "\n");
-            }
-            msg.channel.send(returnValue);
+            msg.channel.send(cat.listCats());
             break;
-          //I want to see a specific kitty!
-          case (cats.indexOf(commands.trim()) > -1):
-            var cat2send = cats.indexOf(commands.trim());
-            msg.channel.send("Presenting... " + properCase(cats[cat2send]) + "!",
-              { files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"] });
-            break;
-          //Generate random cat from current list
+          //Send a kitty
           default:
-            var cat2send = Math.floor(Math.random() * cats.length);
-            msg.channel.send("Presenting... " + properCase(cats[cat2send]) + "!",
-              { files: ["./cats/" + cats[cat2send] + "/" + Math.floor(Math.random() * catsLength[cat2send]) + ".jpg"] });
+            var cat2send = cat.hasCat(commands) ? cat.sendCat(commands) : cat.sendCat()
+            msg.channel.send(cat2send[0], cat2send[1]);
             break;
         }
         break;
@@ -240,7 +229,7 @@ client.on('message', async msg => {
             P.getPokemonByName(commandsArray[0])
               .then(function (pokemon) {
                 //Get all the proper values of the pokemon
-                var pkmnName = properCase(pokemon.name);
+                var pkmnName = proper.properCase(pokemon.name);
                 var pkmnId = pokemon.id;
                 var pkmnHeight = pokemon.height / 10; //Height in metres
                 var pkmnWeight = pokemon.weight / 10; //Weight in kilograms
@@ -248,7 +237,7 @@ client.on('message', async msg => {
                 //Pokemon's type(s) is an array with objects in reverse order
                 var pkmnTypes = [];
                 for (var i = 0; i < pokemon.types.length; i++) {
-                  pkmnTypes[i] = properCase(pokemon.types[i].type.name);
+                  pkmnTypes[i] = proper.properCase(pokemon.types[i].type.name);
                 }
                 pkmnTypes = pkmnTypes.reverse().join("/");
                 //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
@@ -256,9 +245,9 @@ client.on('message', async msg => {
                 var pkmnHiddenAbility = "None";
                 for (var i = 0; i < pokemon.abilities.length; i++) {
                   if (!pokemon.abilities[i].is_hidden) {
-                    pkmnAbilities[i] = properCase(pokemon.abilities[i].ability.name);
+                    pkmnAbilities[i] = proper.properCase(pokemon.abilities[i].ability.name);
                   } else {
-                    pkmnHiddenAbility = properCase(pokemon.abilities[i].ability.name);
+                    pkmnHiddenAbility = proper.properCase(pokemon.abilities[i].ability.name);
                   }
                 }
                 pkmnAbilities = pkmnAbilities.filter(function (i) {
@@ -299,7 +288,7 @@ client.on('message', async msg => {
               .then(function (pokemon) {
                 var response = "";
                 for (var i = pokemon.pokedex_numbers.length - 1; i > 0; i--) {
-                  response += 'In the `' + pokemon.pokedex_numbers[i].pokedex.name + '` pokedex, ' + properCase(pokemon.name) + ' is #`' + pokemon.pokedex_numbers[i].entry_number + '`\n';
+                  response += 'In the `' + pokemon.pokedex_numbers[i].pokedex.name + '` pokedex, ' + proper.properCase(pokemon.name) + ' is #`' + pokemon.pokedex_numbers[i].entry_number + '`\n';
                 }
                 msg.channel.send(response);
               })
@@ -319,7 +308,7 @@ client.on('message', async msg => {
                   //Only keep track of the entries that are english
                   //Maybe in the future add additional command for other languages?
                   if (pokemon.flavor_text_entries[i].language.name == 'en') {
-                    flavorText[j] = "```" + pokemon.flavor_text_entries[i].flavor_text + "\n~ PKMN " + properCase(pokemon.flavor_text_entries[i].version.name + "```");
+                    flavorText[j] = "```" + pokemon.flavor_text_entries[i].flavor_text + "\n~ PKMN " + proper.properCase(pokemon.flavor_text_entries[i].version.name + "```");
                     j++;
                   }
                 }
@@ -370,19 +359,6 @@ function pigLatin(word) {
   } else {
     return (word + "yay").toLowerCase();
   }
-}
-
-//For cats (and maybe future application?)
-//Pre: A string in all lowercase; Post: Capitalize the first letter of that string
-function properCase(word) {
-  var thing2return = "";
-  if (word.charAt(0) >= 'a' && word.charAt(0) <= 'z') {
-    thing2return += word.charAt(0).toUpperCase();
-    thing2return += word.slice(1);
-  } else {
-    thing2return = word;
-  }
-  return thing2return;
 }
 
 
