@@ -4,8 +4,14 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const proper = require('./properCase');
+const speak = require('./speak');
 const cat = require('./cat');
+const pigLatin = require('./pigLatin');
 const chem = require('./chemistry');
+const myMath = require('./myMath');
+const sum = require('./sum');
+const fibonacci = require('./fibonacci');
+const palindrome = require('./palindrome');
 const weather = require('weather-js');
 const Pokedex = require('pokedex-promise-v2');
 const P = new Pokedex();
@@ -23,9 +29,6 @@ client.on('ready', () => {
 
 
 //Create global constants
-const maths = ["+", "-", "*", "/", "%", "^"];
-const PHI = (1 + Math.sqrt(5)) / 2;
-const PSI = -Math.pow(PHI, -1);
 const commandList = ["cat", "fibonacci", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "speak", "sum", "weather"];
 const commandHelp = [
   "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
@@ -75,24 +78,7 @@ client.on('message', async msg => {
 
       //Speak command
       case (commands.substr(0, 5).toLowerCase() == "speak"):
-        var x = Math.floor(Math.random() * 100);
-        switch (true) {
-          case (x <= 50):
-            msg.channel.send("meow");
-            break;
-          case (x <= 70):
-            msg.channel.send("*meow*");
-            break;
-          case (x <= 85):
-            msg.channel.send("**meow**");
-            break;
-          case (x <= 95):
-            msg.channel.send("__meow__");
-            break;
-          default:
-            msg.channel.send("01101101 01100101 01101111 01110111");
-            break;
-        }
+        msg.channel.send(speak.speak());
         break;
 
       //Help command
@@ -111,58 +97,13 @@ client.on('message', async msg => {
 
       //Pig Latin command
       case (commands.substr(0, 8).toLowerCase() == "piglatin"):
-        //Get only the rest of the sentence
-        commands = commands.slice(9);
-        var phrase = commands.split(' ');
-        var returnValue = "";
-        for (var i = 0; i < phrase.length; i++) {
-          returnValue += pigLatin(phrase[i]) + " ";
-        }
-        msg.channel.send(returnValue);
+        msg.channel.send(pigLatin.toPL(commands.slice(9).split(' ')));
         break;
 
       //Math command
       case (commands.substr(0, 4).toLowerCase() == "math"):
         //Shorten message to mathematic expression
-        var expression = commands.slice(5).trim();
-        //Figure out what operation we're doing
-        var operation;
-        var nums;
-        for (var i = 0; i < expression.length; i++) {
-          if (maths.indexOf(expression.charAt(i)) > -1) {
-            operation = expression.charAt(i);
-            nums = expression.split(expression.charAt(i));
-          }
-        }
-        try {
-          if (nums.length == 2) {
-            switch (operation) {
-              case maths[0]:
-                msg.channel.send(parseInt(nums[0]) + parseInt(nums[1]));
-                break;
-              case maths[1]:
-                msg.channel.send(parseInt(nums[0]) - parseInt(nums[1]));
-                break;
-              case maths[2]:
-                msg.channel.send(parseInt(nums[0]) * parseInt(nums[1]));
-                break;
-              case maths[3]:
-                msg.channel.send(parseInt(nums[0]) / parseInt(nums[1]));
-                break;
-              case maths[4]:
-                msg.channel.send(parseInt(nums[0]) % parseInt(nums[1]));
-                break;
-              case maths[5]:
-                msg.channel.send(Math.pow(parseInt(nums[0]), parseInt(nums[1])));
-                break;
-              default:
-                msg.channel.send("Whoopsies, something happened that shouldn't've happened...");
-                break;
-            }
-          }
-        } catch (error) {
-          msg.channel.send("Enter an expression after g.math to use the function properly!!");
-        }
+        msg.channel.send(myMath.compute(commands.slice(5).trim()));
         break;
 
       //Molar Mass command
@@ -172,8 +113,7 @@ client.on('message', async msg => {
 
       //Palindrome command
       case (commands.substr(0, 10).toLowerCase() == "palindrome"):
-        var word = commands.slice(10).toLowerCase().trim();
-        msg.channel.send(isPalindrome(word) ? "This **is** a palindrome" : "This **is not** a palindrome");
+        msg.channel.send(palindrome.isPalindrome(commands.slice(10).toLowerCase().trim()) ? "This **is** a palindrome" : "This **is not** a palindrome");
         break;
 
       //Weather command
@@ -206,18 +146,12 @@ client.on('message', async msg => {
 
       //Sum command
       case (commands.substr(0, 3).toLowerCase() == "sum"):
-        var things2sum = commands.slice(3).split(" ");
-        msg.channel.send("The sum is " + sumThing(things2sum.map(Number)));
+        msg.channel.send("The sum is " + sum.sumThings((commands.slice(3).split(" ")).map(Number)));
         break;
 
       //Fibonacci command
       case (commands.substr(0, 9).toLowerCase() == "fibonacci"):
-        var n = parseInt(commands.slice(9).trim());
-        try {
-          msg.channel.send(fibonacci(n));
-        } catch (err) {
-          msg.channel.send("Please follow up the command with an integer!!");
-        }
+        msg.channel.send(fibonacci.nthTerm(parseInt(commands.slice(9).trim())));
         break;
 
       //Pokemon command
@@ -326,78 +260,3 @@ client.on('message', async msg => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-
-
-//Pig Latin command function
-function pigLatin(word) {
-  var i = 0;
-  while (i != word.length) {
-    if (['a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'].indexOf(word.charAt(i)) > -1) {
-      //There is a vowel at this position
-      if (i == 0) {
-        //Word starts with vowel
-        if ([',', '.', '?', '!'].indexOf(word.charAt(word.length - 1)) > -1) {
-          return (word.substr(0, word.length - 1) + "yay" + word.slice(word.length - 1)).toLowerCase();
-        } else {
-          return (word + "yay").toLowerCase();
-        }
-      } else {
-        //Word does not start with vowel
-        if ([',', '.', '?', '!'].indexOf(word.charAt(word.length - 1)) > -1) {
-          return (word.slice(i, word.length - 1) + word.substr(0, i) + "ay" + word.slice(word.length - 1)).toLowerCase();
-        } else {
-          return (word.slice(i) + word.substr(0, i) + "ay").toLowerCase();
-        }
-      }
-    } else {
-      i++;
-    }
-  }
-  //Word has no vowels
-  if ([',', '.', '?', '!'].indexOf(word.charAt(word.length - 1)) > -1) {
-    return (word.s + "yay").toLowerCase();
-  } else {
-    return (word + "yay").toLowerCase();
-  }
-}
-
-
-//For palindrome
-//Pre: A string is passed and checked if the reverse is the same as the forward
-function isPalindrome(word) {
-  var returnValue = true;
-  for (var i = 0; i < word.length / 2; i++) {
-    if (word.charAt(i) != word.charAt(word.length - 1 - i)) {
-      returnValue = false;
-    }
-  }
-  return returnValue;
-}
-
-
-//For sum command
-//Pre: take an array and sum the numerical values inside of it
-function sumThing(items) {
-  var total = 0;
-  for (var i = 0; i < items.length; i++) {
-    if (!isNaN(items[i])) {
-      total += items[i];
-    }
-  }
-  return total;
-}
-
-
-//For fibonacci command
-/*Normally, a fibonacci function would only return values for the first two terms of the sequence
-* and call on itself recursively to arrive at an answer. However, using the mathematical formula 
-* for the nth term is much faster. The only downside is its source of error, which occurs after 
-* the 70th term. To work around this, we can employ the more traditional fibonacci method to handle 
-* the larger cases, leading to a faster overall program*/
-function fibonacci(n) {
-  if (n <= 70) {
-    return Math.round((Math.pow(PHI, n) - Math.pow(PSI, n)) / Math.sqrt(5));
-  } else {
-    return fibonacci(n - 1) + fibonacci(n - 2);
-  }
-}
