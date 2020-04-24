@@ -62,7 +62,7 @@ client.on('message', async msg => {
       case (commands.substr(0, 3).toLowerCase() == "cat"):
         //Ok we know we're doing the cat command so format to check for the next command
         commands = commands.slice(4).toLowerCase().trim();
-        //Check if a certain cat is wanted
+        //Check if a followup command has been entered
         switch (true) {
           //List the kitties
           case (commands.substr(0, 4).toLowerCase() == "list"):
@@ -253,7 +253,6 @@ client.on('message', async msg => {
               });
             break;
         }
-
         break;
     }
   }
