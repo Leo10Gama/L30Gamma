@@ -119,15 +119,17 @@ client.on('message', async msg => {
       //Weather command
       case (commands.substr(0, 7).toLowerCase() == "weather"):
         var location = commands.slice(7);
+        console.log("Beginning command...");
         weather.find({ search: location, degreeType: 'C' }, function (err, result) {
-          if (err) msg.channel.send("Something went wrong");
-          if (result.length == 0) {
+          console.log("Inside the command");
+          if (err || result.length == 0) {
             msg.channel.send("Please enter a valid location");
             return;
           }
           //Get the current weather info
           var current = result[0].current;
           //Put the results in an embed so it looks prettier
+          console.log("Creating embed...");
           const embed = new Discord.MessageEmbed()
             .setDescription("**" + current.skytext + "**")
             .setAuthor("Weather at " + current.observationpoint)
@@ -140,8 +142,11 @@ client.on('message', async msg => {
               { name: "Winds", value: current.winddisplay, inline: true }
             )
             .setFooter("Local time: " + current.observationtime + " on " + current.date);
+          console.log("Embed created");
           msg.channel.send({ embed });
+          console.log("Message sent");
         })
+        console.log("End of command");
         break;
 
       //Sum command
