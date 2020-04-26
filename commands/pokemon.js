@@ -4,59 +4,84 @@ const Pokedex = require('pokedex-promise-v2');
 const P = new Pokedex();
 
 exports.getDexEntry = function (name, channel) {
-    P.getPokemonByName(name)
+    P.getPokemonSpeciesByName(name)
         .then(function (pokemon) {
-            //Get all the proper values of the pokemon
-            var pkmnName = proper.properCase(pokemon.species.name);
-            var pkmnHeight = pokemon.height / 10; //Height in metres
-            var pkmnWeight = pokemon.weight / 10; //Weight in kilograms
-            var pkmnImage = pokemon.sprites.front_default;
-            //Pokemon's type(s) is an array with objects in reverse order
-            var pkmnTypes = [];
-            for (var i = 0; i < pokemon.types.length; i++) {
-                pkmnTypes[i] = proper.properCase(pokemon.types[i].type.name);
-            }
-            pkmnTypes = pkmnTypes.reverse().join("/");
-            //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
-            var pkmnAbilities = [];
-            var pkmnHiddenAbility = "None";
-            for (var i = 0; i < pokemon.abilities.length; i++) {
-                if (!pokemon.abilities[i].is_hidden) {
-                    pkmnAbilities[i] = proper.properCase(pokemon.abilities[i].ability.name);
-                } else {
-                    pkmnHiddenAbility = proper.properCase(pokemon.abilities[i].ability.name);
-                }
-            }
-            pkmnAbilities = pkmnAbilities.filter(function (i) {
-                return i != null;
-            });
-            pkmnAbilities = pkmnAbilities.join("/");
-            //To access the genus of the pokemon we must use another command in the pokeapi
-            P.getPokemonSpeciesByName(pokemon.species.name)
-                .then(function (pokemonSpecies) {
-                    var pkmnGenus = pokemonSpecies.genera[2].genus; //Index 2 of the genera array is the english translation
-                    var pkmnId = pokemonSpecies.id;
+            //Get all the necessary pokemon values
+            var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
+            var pkmnId = pokemon.id;
+            var pkmnName = proper.properCase(pokemon.name);
+            P.getPokemonByName(pokemon.varieties[0].pokemon.name)
+                .then(function (specificPokemon) {
+                    var pkmnHeight = specificPokemon.height / 10; //Height in metres
+                    var pkmnWeight = specificPokemon.weight / 10; //Weight in kilograms
+                    var pkmnImage = specificPokemon.sprites.front_default;
+                    //Pokemon's type(s) is an array with objects in reverse order
+                    var pkmnTypes = [];
+                    for (var i = 0; i < specificPokemon.types.length; i++) {
+                        pkmnTypes[i] = proper.properCase(specificPokemon.types[i].type.name);
+                    }
+                    pkmnTypes = pkmnTypes.reverse().join("/");
+                    //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
+                    var pkmnAbilities = [];
+                    var pkmnHiddenAbility = "None";
+                    for (var i = 0; i < specificPokemon.abilities.length; i++) {
+                        if (!specificPokemon.abilities[i].is_hidden) {
+                            pkmnAbilities[i] = proper.properCase(specificPokemon.abilities[i].ability.name);
+                        } else {
+                            pkmnHiddenAbility = proper.properCase(specificPokemon.abilities[i].ability.name);
+                        }
+                    }
+                    pkmnAbilities = pkmnAbilities.filter(function (i) {
+                        return i != null;
+                    });
+                    pkmnAbilities = pkmnAbilities.join("/");
                     //Now we must format all the information correctly in an embed to send
-                    const embed = new Discord.MessageEmbed()
-                        .setTitle(pkmnName)
-                        .setAuthor("Pokemon #" + pkmnId)
-                        .setDescription(pkmnGenus)
-                        .setThumbnail(pkmnImage)
-                        .addFields(
-                            { name: "Type", value: pkmnTypes, inline: true },
-                            { name: "Height", value: pkmnHeight + " m", inline: true },
-                            { name: "Weight", value: pkmnWeight + " kg", inline: true },
-                            { name: "Abilities", value: pkmnAbilities, inline: true },
-                            { name: "Hidden Ability", value: pkmnHiddenAbility, inline: true }
-                        );
-                    channel.send(embed);
+                    channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility));
                 })
                 .catch(function (error) {
                     channel.send('There was an ERROR', error);
                 });
         })
         .catch(function (error) {
-            channel.send('Invalid entry. Maybe you misspelt something?\n*(If the pokemon you wish to see has multiple forms, please enter in the format `[name]-[form]`)*', error);
+            //Maybe the person wants to see a specific form of a pokemon?
+            P.getPokemonByName(name)
+                .then(function (specificPokemon) {
+                    console.log(specificPokemon);
+                    var pkmnHeight = specificPokemon.height / 10; //Height in metres
+                    var pkmnWeight = specificPokemon.weight / 10; //Weight in kilograms
+                    var pkmnImage = specificPokemon.sprites.front_default;
+                    //Pokemon's type(s) is an array with objects in reverse order
+                    var pkmnTypes = [];
+                    for (var i = 0; i < specificPokemon.types.length; i++) {
+                        pkmnTypes[i] = proper.properCase(specificPokemon.types[i].type.name);
+                    }
+                    pkmnTypes = pkmnTypes.reverse().join("/");
+                    //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
+                    var pkmnAbilities = [];
+                    var pkmnHiddenAbility = "None";
+                    for (var i = 0; i < specificPokemon.abilities.length; i++) {
+                        if (!specificPokemon.abilities[i].is_hidden) {
+                            pkmnAbilities[i] = proper.properCase(specificPokemon.abilities[i].ability.name);
+                        } else {
+                            pkmnHiddenAbility = proper.properCase(specificPokemon.abilities[i].ability.name);
+                        }
+                    }
+                    pkmnAbilities = pkmnAbilities.filter(function (i) {
+                        return i != null;
+                    });
+                    pkmnAbilities = pkmnAbilities.join("/");
+                    P.getPokemonSpeciesByName(specificPokemon.species.name)
+                        .then(function (pokemon) {
+                            var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
+                            var pkmnId = pokemon.id;
+                            var pkmnName = proper.properCase(pokemon.name);
+                            //Now that we have all the data, send it off!
+                            channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility));
+                        })
+                })
+                .catch(function (error) {
+                    channel.send("Invalid entry. Maybe you misspelt something?\n*(If you wish to see a pokemon's specific form, please enter in the format `[name]-[form]`)*", error);
+                })
         });
 }
 
@@ -64,10 +89,12 @@ exports.getPokemonId = function (name, channel) {
     P.getPokemonSpeciesByName(name)
         .then(function (pokemon) {
             console.log(pokemon);
+            console.log(pokemon.varieties);
             var response = "";
             for (var i = pokemon.pokedex_numbers.length - 1; i > 0; i--) {
                 response += 'In the `' + pokemon.pokedex_numbers[i].pokedex.name + '` pokedex, ' + proper.properCase(pokemon.name) + ' is #`' + pokemon.pokedex_numbers[i].entry_number + '`\n';
             }
+            response = response == "" ? "In the `national` pokedex, " + proper.properCase(pokemon.name) + " is #`" + pokemon.id + "`" : response;
             channel.send(response);
         })
         .catch(function (error) {
@@ -93,4 +120,19 @@ exports.getFlavorText = function (name, channel) {
         .catch(function (error) {
             channel.send('Invalid entry. Maybe you misspelt something?\n*(For the `info` command, please just enter the pokemon name, regardless of form)*', error);
         });
+}
+
+function makeEmbed (pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility) {
+    return new Discord.MessageEmbed()
+    .setTitle(pkmnName)
+    .setAuthor("Pokemon #" + pkmnId)
+    .setDescription(pkmnGenus)
+    .setThumbnail(pkmnImage)
+    .addFields(
+        { name: "Type", value: pkmnTypes, inline: true },
+        { name: "Height", value: pkmnHeight + " m", inline: true },
+        { name: "Weight", value: pkmnWeight + " kg", inline: true },
+        { name: "Abilities", value: pkmnAbilities, inline: true },
+        { name: "Hidden Ability", value: pkmnHiddenAbility, inline: true }
+    );
 }
