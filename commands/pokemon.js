@@ -7,8 +7,7 @@ exports.getDexEntry = function (name, channel) {
     P.getPokemonByName(name)
         .then(function (pokemon) {
             //Get all the proper values of the pokemon
-            var pkmnName = proper.properCase(pokemon.name);
-            var pkmnId = pokemon.id;
+            var pkmnName = proper.properCase(pokemon.species.name);
             var pkmnHeight = pokemon.height / 10; //Height in metres
             var pkmnWeight = pokemon.weight / 10; //Weight in kilograms
             var pkmnImage = pokemon.sprites.front_default;
@@ -33,10 +32,10 @@ exports.getDexEntry = function (name, channel) {
             });
             pkmnAbilities = pkmnAbilities.join("/");
             //To access the genus of the pokemon we must use another command in the pokeapi
-            var pkmnGenus;
-            P.getPokemonSpeciesByName(pokemon.name)
+            P.getPokemonSpeciesByName(pokemon.species.name)
                 .then(function (pokemonSpecies) {
-                    pkmnGenus = pokemonSpecies.genera[2].genus; //Index 2 of the genera array is the english translation
+                    var pkmnGenus = pokemonSpecies.genera[2].genus; //Index 2 of the genera array is the english translation
+                    var pkmnId = pokemonSpecies.id;
                     //Now we must format all the information correctly in an embed to send
                     const embed = new Discord.MessageEmbed()
                         .setTitle(pkmnName)
@@ -57,13 +56,14 @@ exports.getDexEntry = function (name, channel) {
                 });
         })
         .catch(function (error) {
-            channel.send('Invalid entry. Maybe you misspelt something?', error);
+            channel.send('Invalid entry. Maybe you misspelt something?\n*(If the pokemon you wish to see has multiple forms, please enter in the format `[name]-[form]`)*', error);
         });
 }
 
 exports.getPokemonId = function (name, channel) {
     P.getPokemonSpeciesByName(name)
         .then(function (pokemon) {
+            console.log(pokemon);
             var response = "";
             for (var i = pokemon.pokedex_numbers.length - 1; i > 0; i--) {
                 response += 'In the `' + pokemon.pokedex_numbers[i].pokedex.name + '` pokedex, ' + proper.properCase(pokemon.name) + ' is #`' + pokemon.pokedex_numbers[i].entry_number + '`\n';
@@ -71,7 +71,7 @@ exports.getPokemonId = function (name, channel) {
             channel.send(response);
         })
         .catch(function (error) {
-            channel.send('Invalid entry. Maybe you misspelt something?', error);
+            channel.send('Invalid entry. Maybe you misspelt something?\n*(For the `id` command, please just enter the pokemon name, regardless of form)*', error);
         });
 }
 
@@ -91,6 +91,6 @@ exports.getFlavorText = function (name, channel) {
             channel.send(flavorText[Math.floor(Math.random() * flavorText.length)]);
         })
         .catch(function (error) {
-            channel.send('Invalid entry. Maybe you misspelt something?', error);
+            channel.send('Invalid entry. Maybe you misspelt something?\n*(For the `info` command, please just enter the pokemon name, regardless of form)*', error);
         });
 }
