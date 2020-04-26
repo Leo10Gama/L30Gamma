@@ -12,7 +12,7 @@ const myMath = require('./commands/myMath');
 const sum = require('./commands/sum');
 const fibonacci = require('./commands/fibonacci');
 const palindrome = require('./commands/palindrome');
-const weather = require('weather-js');
+const weather = require('./commands/myWeather');
 const Pokedex = require('pokedex-promise-v2');
 const P = new Pokedex();
 
@@ -29,17 +29,18 @@ client.on('ready', () => {
 
 
 //Create global constants
-const commandList = ["cat", "fibonacci", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "speak", "sum", "weather"];
+const commandList = ["cat", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "speak", "sum", "weather"];
 const commandHelp = [
-  "I'll show you a picture of a cat! You can follow up the command with either 'list' or the name of the cat you wanna see!",
+  "I'll show you a picture of a cat! Follow up commands include:\n`list`\n`[the name of a cat from 'list']`",
   "I'll tell you the nth term of the fibonacci sequence",
+  "Enter a city and I'll give you that city's 5-day forecast",
   "Well, I'm sure you know what this command does since you called it just now, huh",
-  "Do a basic math operation! Right now, I can only handle single expressons (i.e. 4 + 6)",
+  "Do a basic math operation with the format `[number] [operation] [number]`. Operations include: `+, -, *, /, %, ^`",
   "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
   "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
   "Convert a sentence to pig latin",
-  "Enter the name of a Pokemon and I'll give you information on that Pokemon! Follow up commands include: 'id', 'info'",
-  "I can hold some really good conversation if you want to talk with me for a while",
+  "Enter the name of a Pokemon and I'll give you information on that Pokemon! You can follow up the command with one of the following:\n`id`\n`info`",
+  "I can hold some really good conversation if you want to talk with me for a while :3",
   "Enter a list of numbers and I'll sum them up for you",
   "Enter a city and I'll let you know what the weather there is like right now"];
 
@@ -85,9 +86,9 @@ client.on('message', async msg => {
       case (commands.substr(0, 4).toLowerCase() == "help"):
         commands = commands.slice(4).trim().toLowerCase();
         if (commands == "") {
-          var returnValue = "Here's a list of all the things I can do:\n";
+          var returnValue = "Here's all the things I can do! If you'd like a more detailed explanation on how to use a specific command, type `help [command]`\n";
           for (var i = 0; i < commandList.length; i++) {
-            returnValue += "`" + commandList[i] + "`: " + commandHelp[i] + "\n";
+            returnValue += "`" + commandList[i] + "`\n";
           }
           msg.channel.send(returnValue);
         } else if (commandList.indexOf(commands > -1)) {
@@ -118,35 +119,11 @@ client.on('message', async msg => {
 
       //Weather command
       case (commands.substr(0, 7).toLowerCase() == "weather"):
-        var location = commands.slice(7);
-        console.log("Beginning command...");
-        weather.find({ search: location, degreeType: 'C' }, function (err, result) {
-          console.log("Inside the command");
-          if (err || result.length == 0) {
-            msg.channel.send("Please enter a valid location");
-            return;
-          }
-          //Get the current weather info
-          var current = result[0].current;
-          //Put the results in an embed so it looks prettier
-          console.log("Creating embed...");
-          const embed = new Discord.MessageEmbed()
-            .setDescription("**" + current.skytext + "**")
-            .setAuthor("Weather at " + current.observationpoint)
-            .setThumbnail(current.imageUrl)
-            .setColor("0099ff")
-            .addFields(
-              { name: "Temperature", value: current.temperature + "\xB0C", inline: true },
-              { name: "Feels like", value: current.feelslike + "\xB0C", inline: true },
-              { name: "Humidity", value: current.humidity + "%", inline: true },
-              { name: "Winds", value: current.winddisplay, inline: true }
-            )
-            .setFooter("Local time: " + current.observationtime + " on " + current.date);
-          console.log("Embed created");
-          msg.channel.send({ embed });
-          console.log("Message sent");
-        })
-        console.log("End of command");
+        weather.getWeather(commands.slice(7).trim(), msg.channel);
+        break;
+      //Forecast command
+      case (commands.substr(0, 8).toLowerCase() == "forecast"):
+        weather.getForecast(commands.slice(8).trim(), msg.channel);
         break;
 
       //Sum command
