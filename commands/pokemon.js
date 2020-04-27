@@ -2,6 +2,9 @@ const Discord = require('discord.js');
 const proper = require('./properCase');
 const Pokedex = require('pokedex-promise-v2');
 const P = new Pokedex();
+const DEFAULT_ERROR = "Invalid entry. Maybe you misspelt something?";
+const DONT_ENTER_FORM_ERROR = DEFAULT_ERROR + "\n*(For this command, please just enter the pokemon name, regardless of form)*";
+const NEED_FORM_ERROR = DEFAULT_ERROR + "\n*(If you wish to see a pokemon's specific form, please enter in the format `[name]-[form]`)*";
 
 exports.getDexEntry = function (name, channel) {
     P.getPokemonSpeciesByName(name)
@@ -80,7 +83,7 @@ exports.getDexEntry = function (name, channel) {
                         })
                 })
                 .catch(function (error) {
-                    channel.send("Invalid entry. Maybe you misspelt something?\n*(If you wish to see a pokemon's specific form, please enter in the format `[name]-[form]`)*", error);
+                    channel.send(NEED_FORM_ERROR, error);
                 })
         });
 }
@@ -98,7 +101,7 @@ exports.getPokemonId = function (name, channel) {
             channel.send(response);
         })
         .catch(function (error) {
-            channel.send('Invalid entry. Maybe you misspelt something?\n*(For the `id` command, please just enter the pokemon name, regardless of form)*', error);
+            channel.send(DONT_ENTER_FORM_ERROR, error);
         });
 }
 
@@ -118,21 +121,35 @@ exports.getFlavorText = function (name, channel) {
             channel.send(flavorText[Math.floor(Math.random() * flavorText.length)]);
         })
         .catch(function (error) {
-            channel.send('Invalid entry. Maybe you misspelt something?\n*(For the `info` command, please just enter the pokemon name, regardless of form)*', error);
+            channel.send(DONT_ENTER_FORM_ERROR, error);
         });
 }
 
-function makeEmbed (pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility) {
+exports.getForms = function (name, channel) {
+    P.getPokemonSpeciesByName(name)
+        .then(function (pokemon) {
+            var returnValue = "Forms of **" + proper.properCase(pokemon.name) + "**:\n";
+            for(var i=0; i<pokemon.varieties.length; i++) {
+                returnValue += "`" + pokemon.varieties[i].pokemon.name + "`\n";
+            }
+        channel.send(returnValue);
+        })
+        .catch(function (error) {
+            channel.send(DONT_ENTER_FORM_ERROR, error);
+        })
+}
+
+function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility) {
     return new Discord.MessageEmbed()
-    .setTitle(pkmnName)
-    .setAuthor("Pokemon #" + pkmnId)
-    .setDescription(pkmnGenus)
-    .setThumbnail(pkmnImage)
-    .addFields(
-        { name: "Type", value: pkmnTypes, inline: true },
-        { name: "Height", value: pkmnHeight + " m", inline: true },
-        { name: "Weight", value: pkmnWeight + " kg", inline: true },
-        { name: "Abilities", value: pkmnAbilities, inline: true },
-        { name: "Hidden Ability", value: pkmnHiddenAbility, inline: true }
-    );
+        .setTitle(pkmnName)
+        .setAuthor("Pokemon #" + pkmnId)
+        .setDescription(pkmnGenus)
+        .setThumbnail(pkmnImage)
+        .addFields(
+            { name: "Type", value: pkmnTypes, inline: true },
+            { name: "Height", value: pkmnHeight + " m", inline: true },
+            { name: "Weight", value: pkmnWeight + " kg", inline: true },
+            { name: "Abilities", value: pkmnAbilities, inline: true },
+            { name: "Hidden Ability", value: pkmnHiddenAbility, inline: true }
+        );
 }

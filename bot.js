@@ -38,7 +38,7 @@ const commandHelp = [
   "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
   "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
   "Convert a sentence to pig latin",
-  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`id`\n`info` or `flavor text` or `flavour text`",
+  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`forms`\n`id`\n`info` or `flavor text` or `flavour text`",
   "I can hold some really good conversation if you want to talk with me for a while :3",
   "Enter a list of numbers and I'll sum them up for you",
   "Enter a city and I'll let you know what the weather there is like right now"];
@@ -150,8 +150,12 @@ client.on('message', async msg => {
           //Get some delicious, delicious flavour text (mmmm delicious)
           /*Let it be known that this didnt compile the first time because the API spells it "flavor" and not "flavour"
           * Truly a lesson in regional implementation */
-          case (commandsArray[1] == "info" || commandsArray[1] + " " + commandsArray[2] == "flavor text" || commandsArray[1] + " " + commandsArray[2] =="flavour text"):
+          case (commandsArray[1] == "info" || commandsArray[1] + " " + commandsArray[2] == "flavor text" || commandsArray[1] + " " + commandsArray[2] == "flavour text"):
             pokedex.getFlavorText(commandsArray[0], msg.channel);
+            break;
+          //Get a list of the pokemon's forms
+          case (commandsArray[1] == "forms"):
+            pokedex.getForms(commandsArray[0], msg.channel);
             break;
         }
         break;
