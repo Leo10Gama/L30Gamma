@@ -5,6 +5,7 @@ const P = new Pokedex();
 const DEFAULT_ERROR = "Invalid entry. Maybe you misspelt something?";
 const DONT_ENTER_FORM_ERROR = DEFAULT_ERROR + "\n*(For this command, please just enter the pokemon name, regardless of form)*";
 const NEED_FORM_ERROR = DEFAULT_ERROR + "\n*(If you wish to see a pokemon's specific form, please enter in the format `[name]-[form]`, or type `forms` to see a list of possible forms)*";
+const COLOR_MAP = new Map([["red", [255, 0, 0]], ["blue", [0, 0, 255]], ["yellow", [255, 247, 0]], ["green", [0, 255, 0]], ["black", [0, 0, 0]], ["brown", [140, 90, 40]], ["purple", [200, 0, 255]], ["gray", [120, 120, 120]], ["white", [254, 254, 254]], ["pink", [255, 180, 220]]])
 
 exports.getDexEntry = function (name, channel) {
     P.getPokemonSpeciesByName(name)
@@ -13,6 +14,7 @@ exports.getDexEntry = function (name, channel) {
             var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
             var pkmnId = pokemon.id;
             var pkmnName = proper.properCase(pokemon.name);
+            var pkmnColor = pokemon.color.name;
             P.getPokemonByName(pokemon.varieties[0].pokemon.name)
                 .then(function (specificPokemon) {
                     var pkmnHeight = specificPokemon.height / 10; //Height in metres
@@ -39,7 +41,7 @@ exports.getDexEntry = function (name, channel) {
                     });
                     pkmnAbilities = pkmnAbilities.join("/");
                     //Now we must format all the information correctly in an embed to send
-                    channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility));
+                    channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor));
                 })
                 .catch(function (error) {
                     channel.send('There was an ERROR', error);
@@ -77,8 +79,9 @@ exports.getDexEntry = function (name, channel) {
                             var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
                             var pkmnId = pokemon.id;
                             var pkmnName = proper.properCase(pokemon.name);
+                            var pkmnColor = pokemon.color.name;
                             //Now that we have all the data, send it off!
-                            channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility));
+                            channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor));
                         })
                 })
                 .catch(function (error) {
@@ -165,7 +168,40 @@ exports.getStats = function (name, channel) {
         })
 }
 
-function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility) {
+exports.getHeight = function (name, channel) {
+    P.getPokemonByName(name)
+        .then(function (pokemon) {
+            var height = pokemon.height / 10;   //Height in metres
+            const embed = new Discord.MessageEmbed()
+                .setTitle(height + " metres\n" + m2feet(height))
+                .setAuthor(proper.properCase(pokemon.name))
+                .setThumbnail(pokemon.sprites.front_default);
+            channel.send(embed);
+        })
+        .catch(function () {
+            //Check if just a pokemon name and not form was entered
+            P.getPokemonSpeciesByName(name)
+                .then(function (maybePokemon) {
+                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
+                        .then(function (pokemon) {
+                            var height = pokemon.height / 10;   //Height in metres
+                            const embed = new Discord.MessageEmbed()
+                                .setTitle(height + " metres\n" + m2feet(height))
+                                .setAuthor(proper.properCase(pokemon.species.name))
+                                .setThumbnail(pokemon.sprites.front_default);
+                            channel.send(embed);
+                        })
+                        .catch(function (error) {
+                            channel.send(DEFAULT_ERROR, error);
+                        })
+                })
+                .catch(function (error) {
+                    channel.send(NEED_FORM_ERROR, error);
+                })
+        })
+}
+
+function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor) {
     return new Discord.MessageEmbed()
         .setTitle(pkmnName)
         .setAuthor("Pokemon #" + pkmnId)
@@ -177,7 +213,8 @@ function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight
             { name: "Weight", value: pkmnWeight + " kg", inline: true },
             { name: "Abilities", value: pkmnAbilities, inline: true },
             { name: "Hidden Ability", value: pkmnHiddenAbility, inline: true }
-        );
+        )
+        .setColor(COLOR_MAP.get(pkmnColor));
 }
 
 function drawStatBar(stat) {
@@ -208,4 +245,10 @@ function drawStatBar(stat) {
         stat = stat - 8 < 0 ? 0 : stat - 8;
     }
     return returnValue + " " + initialStat;
+}
+
+function m2feet(height) {
+    var inches = Math.round(height * 39.37);
+    var feet = Math.floor(inches / 12);
+    return feet + "'" + (inches % 12 < 10 ? "0" + inches % 12 : inches % 12) + '"';
 }

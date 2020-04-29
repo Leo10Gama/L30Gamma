@@ -161,6 +161,10 @@ client.on('message', async msg => {
           case (commandsArray[1] == "stats"):
             pokedex.getStats(commandsArray[0], msg.channel);
             break;
+          //Get the pokemon's height
+          case (commandsArray[1] == "height"):
+            pokedex.getHeight(commandsArray[0], msg.channel);
+            break;
         }
         break;
     }
