@@ -38,7 +38,7 @@ const commandHelp = [
   "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
   "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
   "Convert a sentence to pig latin",
-  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`forms`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`",
+  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`weight`",
   "I can hold some really good conversation if you want to talk with me for a while :3",
   "Enter a list of numbers and I'll sum them up for you",
   "Enter a city and I'll let you know what the weather there is like right now"];
@@ -160,6 +160,14 @@ client.on('message', async msg => {
           //Get the pokemon's stats
           case (commandsArray[1] == "stats"):
             pokedex.getStats(commandsArray[0], msg.channel);
+            break;
+          //Get the pokemon's height
+          case (commandsArray[1] == "height"):
+            pokedex.getHeight(commandsArray[0], msg.channel);
+            break;
+          //Get the pokemon's weight
+          case(commandsArray[1] == "weight"):
+            pokedex.getWeight(commandsArray[0], msg.channel);
             break;
         }
         break;
