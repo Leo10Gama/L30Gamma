@@ -153,7 +153,7 @@ exports.getStats = function (name, channel) {
                 .then(function (maybePokemon) {
                     P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
                         .then(function (pokemon) {
-                            channel.send("Stats for **" + proper.properCase(pokemon.name) + "**:\n```HP \n" + drawStatBar(pokemon.stats[5].base_stat) +
+                            channel.send("Stats for **" + proper.properCase(pokemon.species.name) + "**:\n```HP \n" + drawStatBar(pokemon.stats[5].base_stat) +
                                 "\nAttack\n" + drawStatBar(pokemon.stats[4].base_stat) + "\nDefense\n" + drawStatBar(pokemon.stats[3].base_stat) +
                                 "\nSpecial Attack\n" + drawStatBar(pokemon.stats[2].base_stat) + "\nSpecial Defense\n" + drawStatBar(pokemon.stats[1].base_stat) +
                                 "\nSpeed\n" + drawStatBar(pokemon.stats[0].base_stat) + "```");
@@ -172,11 +172,7 @@ exports.getHeight = function (name, channel) {
     P.getPokemonByName(name)
         .then(function (pokemon) {
             var height = pokemon.height / 10;   //Height in metres
-            const embed = new Discord.MessageEmbed()
-                .setTitle(height + " metres\n" + m2feet(height))
-                .setAuthor(proper.properCase(pokemon.name))
-                .setThumbnail(pokemon.sprites.front_default);
-            channel.send(embed);
+            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), height + " metres\n" + m2feet(height), pokemon.sprites.front_default));
         })
         .catch(function () {
             //Check if just a pokemon name and not form was entered
@@ -185,11 +181,32 @@ exports.getHeight = function (name, channel) {
                     P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
                         .then(function (pokemon) {
                             var height = pokemon.height / 10;   //Height in metres
-                            const embed = new Discord.MessageEmbed()
-                                .setTitle(height + " metres\n" + m2feet(height))
-                                .setAuthor(proper.properCase(pokemon.species.name))
-                                .setThumbnail(pokemon.sprites.front_default);
-                            channel.send(embed);
+                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), height + " metres\n" + m2feet(height), pokemon.sprites.front_default));
+                        })
+                        .catch(function (error) {
+                            channel.send(DEFAULT_ERROR, error);
+                        })
+                })
+                .catch(function (error) {
+                    channel.send(NEED_FORM_ERROR, error);
+                })
+        })
+}
+
+exports.getWeight = function (name, channel) {
+    P.getPokemonByName(name)
+        .then(function (pokemon) {
+            var weight = pokemon.weight / 10;   //Weight in kilograms
+            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), weight + " kg\n" + kg2lbs(weight) + "lbs", pokemon.sprites.front_default));
+        })
+        .catch(function () {
+            //Check if just a pokemon name and not form was entered
+            P.getPokemonSpeciesByName(name)
+                .then(function (maybePokemon) {
+                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
+                        .then(function (pokemon) {
+                            var weight = pokemon.weight / 10;   //Weight in kilograms
+                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), height + " kg\n" + kg2lbs(weight) + " lbs", pokemon.sprites.front_default));
                         })
                         .catch(function (error) {
                             channel.send(DEFAULT_ERROR, error);
@@ -215,6 +232,13 @@ function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight
             { name: "Hidden Ability", value: pkmnHiddenAbility, inline: true }
         )
         .setColor(COLOR_MAP.get(pkmnColor));
+}
+
+function twoLineEmbed(topLine, bottomLine, image) {
+    return new Discord.MessageEmbed()
+        .setTitle(bottomLine)
+        .setAuthor(topLine)
+        .setThumbnail(image);
 }
 
 function drawStatBar(stat) {
@@ -251,4 +275,8 @@ function m2feet(height) {
     var inches = Math.round(height * 39.37);
     var feet = Math.floor(inches / 12);
     return feet + "'" + (inches % 12 < 10 ? "0" + inches % 12 : inches % 12) + '"';
+}
+
+function kg2lbs(weight) {
+    return (weight * 2.20462).toFixed(1);
 }
