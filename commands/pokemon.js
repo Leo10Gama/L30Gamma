@@ -172,7 +172,7 @@ exports.getHeight = function (name, channel) {
     P.getPokemonByName(name)
         .then(function (pokemon) {
             var height = pokemon.height / 10;   //Height in metres
-            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), height + " metres\n" + m2feet(height), pokemon.sprites.front_default));
+            channel.send(twoLineEmbed(proper.properCase(pokemon.name), height + " metres\n" + m2feet(height), pokemon.sprites.front_default));
         })
         .catch(function () {
             //Check if just a pokemon name and not form was entered
@@ -197,7 +197,7 @@ exports.getWeight = function (name, channel) {
     P.getPokemonByName(name)
         .then(function (pokemon) {
             var weight = pokemon.weight / 10;   //Weight in kilograms
-            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), weight + " kg\n" + kg2lbs(weight) + "lbs", pokemon.sprites.front_default));
+            channel.send(twoLineEmbed(proper.properCase(pokemon.name), weight + " kg\n" + kg2lbs(weight) + "lbs", pokemon.sprites.front_default));
         })
         .catch(function () {
             //Check if just a pokemon name and not form was entered
@@ -206,7 +206,40 @@ exports.getWeight = function (name, channel) {
                     P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
                         .then(function (pokemon) {
                             var weight = pokemon.weight / 10;   //Weight in kilograms
-                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), height + " kg\n" + kg2lbs(weight) + " lbs", pokemon.sprites.front_default));
+                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), weight + " kg\n" + kg2lbs(weight) + " lbs", pokemon.sprites.front_default));
+                        })
+                        .catch(function (error) {
+                            channel.send(DEFAULT_ERROR, error);
+                        })
+                })
+                .catch(function (error) {
+                    channel.send(NEED_FORM_ERROR, error);
+                })
+        })
+}
+
+exports.getType = function (name, channel) {
+    P.getPokemonByName(name)
+        .then(function (pokemon) {
+            var pkmnTypes = [];
+            for (var i in pokemon.types) {
+                pkmnTypes[i] = proper.properCase(pokemon.types[i].type.name);   //Types is an array of 1-2 items entered in reverse order
+            }
+            pkmnTypes = pkmnTypes.reverse().join("/");
+            channel.send(twoLineEmbed(proper.properCase(pokemon.name), pkmnTypes, pokemon.sprites.front_default));
+        })
+        .catch(function () {
+            //Check if just a pokemon name and not form was entered
+            P.getPokemonSpeciesByName(name)
+                .then(function (maybePokemon) {
+                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
+                        .then(function (pokemon) {
+                            var pkmnTypes = [];
+                            for (var i in pokemon.types) {
+                                pkmnTypes[i] = proper.properCase(pokemon.types[i].type.name);   //Types is an array of 1-2 items entered in reverse order
+                            }
+                            pkmnTypes = pkmnTypes.reverse().join("/");
+                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), pkmnTypes, pokemon.sprites.front_default));
                         })
                         .catch(function (error) {
                             channel.send(DEFAULT_ERROR, error);

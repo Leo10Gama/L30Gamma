@@ -166,8 +166,11 @@ client.on('message', async msg => {
             pokedex.getHeight(commandsArray[0], msg.channel);
             break;
           //Get the pokemon's weight
-          case(commandsArray[1] == "weight"):
+          case (commandsArray[1] == "weight"):
             pokedex.getWeight(commandsArray[0], msg.channel);
+            break;
+          case (commandsArray[1] == "type"):
+            pokedex.getType(commandsArray[0], msg.channel);
             break;
         }
         break;
