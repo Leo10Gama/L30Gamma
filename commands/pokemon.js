@@ -251,6 +251,98 @@ exports.getType = function (name, channel) {
         })
 }
 
+exports.getEffectiveness = function (name, channel) {
+    P.getPokemonByName(name)
+        .then(function (pokemon) {
+            var typeEffectiveness = new Map([["normal", 1], ["fire", 1], ["water", 1], ["grass", 1], ["electric", 1], ["ice", 1], ["fighting", 1], ["poison", 1],
+            ["ground", 1], ["flying", 1], ["psychic", 1], ["bug", 1], ["rock", 1], ["ghost", 1], ["dark", 1], ["dragon", 1], ["steel", 1], ["fairy", 1]]);
+            //Figure out how many types the pokemon has first
+            switch (true) {
+                case (pokemon.types.length == 1):    //Pokemon only has one type
+                    P.getTypeByName(pokemon.types[0].type.name)
+                        .then(function (type) {
+                            typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type.damage_relations.no_damage_from, type.damage_relations.half_damage_from, type.damage_relations.double_damage_from);
+                            channel.send("Type effectiveness against **" + proper.properCase(pokemon.name) + "**\n" + listEffectiveness(typeEffectiveness));
+                        })
+                        .catch(function (error) {
+                            channel.send(DEFAULT_ERROR, error);
+                        })
+                    break;
+                case (pokemon.types.length == 2):    //Pokemon has two different types
+                    P.getTypeByName(pokemon.types[0].type.name)
+                        .then(function (type1) {
+                            typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type1.damage_relations.no_damage_from, type1.damage_relations.half_damage_from, type1.damage_relations.double_damage_from);
+                            P.getTypeByName(pokemon.types[1].type.name)
+                                .then(function (type2) {
+                                    typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type2.damage_relations.no_damage_from, type2.damage_relations.half_damage_from, type2.damage_relations.double_damage_from);
+                                    channel.send("Type effectiveness against **" + proper.properCase(pokemon.name) + "**\n" + listEffectiveness(typeEffectiveness));
+                                })
+                                .catch(function (error) {
+                                    channel.send(DEFAULT_ERROR, error);
+                                })
+                        })
+                        .catch(function (error) {
+                            channel.send(DEFAULT_ERROR, error);
+                        })
+                    break;
+                default:                            //This line should theoretically never run but just in case
+                    channel.send(DEFAULT_ERROR);
+                    break;
+            }
+        })
+        .catch(function () {
+            //Check if just a pokemon name and not form was entered
+            P.getPokemonSpeciesByName(name)
+                .then(function (maybePokemon) {
+                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
+                        .then(function (pokemon) {
+                            var typeEffectiveness = new Map([["normal", 1], ["fire", 1], ["water", 1], ["grass", 1], ["electric", 1], ["ice", 1], ["fighting", 1],
+                            ["poison", 1], ["ground", 1], ["flying", 1], ["psychic", 1], ["bug", 1], ["rock", 1], ["ghost", 1], ["dark", 1], ["dragon", 1],
+                            ["steel", 1], ["fairy", 1]]);
+                            //Figure out how many types the pokemon has first
+                            switch (true) {
+                                case (pokemon.types.length == 1):    //Pokemon only has one type
+                                    P.getTypeByName(pokemon.types[0].type.name)
+                                        .then(function (type) {
+                                            typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type.damage_relations.no_damage_from, type.damage_relations.half_damage_from, type.damage_relations.double_damage_from);
+                                            channel.send("Type effectiveness against **" + proper.properCase(pokemon.species.name) + "**\n" + listEffectiveness(typeEffectiveness));
+                                        })
+                                        .catch(function (error) {
+                                            channel.send(DEFAULT_ERROR, error);
+                                        })
+                                    break;
+                                case (pokemon.types.length == 2):    //Pokemon has two different types
+                                    P.getTypeByName(pokemon.types[0].type.name)
+                                        .then(function (type1) {
+                                            typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type1.damage_relations.no_damage_from, type1.damage_relations.half_damage_from, type1.damage_relations.double_damage_from);
+                                            P.getTypeByName(pokemon.types[1].type.name)
+                                                .then(function (type2) {
+                                                    typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type2.damage_relations.no_damage_from, type2.damage_relations.half_damage_from, type2.damage_relations.double_damage_from);
+                                                    channel.send("Type effectiveness against **" + proper.properCase(pokemon.species.name) + "**\n" + listEffectiveness(typeEffectiveness));
+                                                })
+                                                .catch(function (error) {
+                                                    channel.send(DEFAULT_ERROR, error);
+                                                })
+                                        })
+                                        .catch(function (error) {
+                                            channel.send(DEFAULT_ERROR, error);
+                                        })
+                                    break;
+                                default:                            //This line should theoretically never run but just in case
+                                    channel.send(DEFAULT_ERROR);
+                                    break;
+                            }
+                        })
+                        .catch(function (error) {
+                            channel.send(DEFAULT_ERROR, error);
+                        })
+                })
+                .catch(function (error) {
+                    channel.send(NEED_FORM_ERROR, error);
+                })
+        })
+}
+
 function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor) {
     return new Discord.MessageEmbed()
         .setTitle(pkmnName)
@@ -312,4 +404,36 @@ function m2feet(height) {
 
 function kg2lbs(weight) {
     return (weight * 2.20462).toFixed(1);
+}
+
+/*Pre:  typeEffectiveness is a map of [pokemon type, damage multiplier]
+*       noDamage, halfDamage, and doubleDamage are objects with the name of the type */
+function multiplyEffectiveness(typeEffectiveness, noDamage, halfDamage, doubleDamage) {
+    //No damage
+    for (var i in noDamage) {
+        typeEffectiveness.set(noDamage[i].name, typeEffectiveness.get(noDamage[i].name) * 0);
+    }
+    //Half damage
+    for (var i in halfDamage) {
+        typeEffectiveness.set(halfDamage[i].name, typeEffectiveness.get(halfDamage[i].name) * 0.5);
+    }
+    //Double damage
+    for (var i in doubleDamage) {
+        typeEffectiveness.set(doubleDamage[i].name, typeEffectiveness.get(doubleDamage[i].name) * 2);
+    }
+    return typeEffectiveness;
+}
+
+function listEffectiveness(typeEffectiveness) {
+    var returnValue = "```";
+    for (var [type, effectiveness] of typeEffectiveness.entries()) {
+        var type2insert = proper.properCase(type);
+        for(var i=0; type2insert.length<9; i++) {
+            if(type2insert.length != 9) {
+                type2insert += " ";
+            }
+        }
+        returnValue += type2insert + " \u00D7 " + (effectiveness == 0.5 ? "\u00BD" : effectiveness == 0.25 ? "\u00BC" : effectiveness) + "\n";
+    }
+    return returnValue + "```"
 }
