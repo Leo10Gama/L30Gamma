@@ -343,6 +343,20 @@ exports.getEffectiveness = function (name, channel) {
         })
 }
 
+exports.getEggGroup = function (name, channel) {
+    P.getPokemonSpeciesByName(name)
+        .then(function (pokemon) {
+            var returnValue = [];
+            for (var i in pokemon.egg_groups) {
+                returnValue[i] = proper.properCase(pokemon.egg_groups[i].name);
+            }
+            channel.send("**" + proper.properCase(pokemon.name) + "** is in the `" + returnValue[0] + (returnValue.length == 2 ? "` and `" + returnValue[1] + "` egg groups" : "` egg group"));
+        })
+        .catch(function (error) {
+            channel.send(DONT_ENTER_FORM_ERROR, error);
+        })
+}
+
 function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor) {
     return new Discord.MessageEmbed()
         .setTitle(pkmnName)
@@ -428,8 +442,8 @@ function listEffectiveness(typeEffectiveness) {
     var returnValue = "```";
     for (var [type, effectiveness] of typeEffectiveness.entries()) {
         var type2insert = proper.properCase(type);
-        for(var i=0; type2insert.length<9; i++) {
-            if(type2insert.length != 9) {
+        for (var i = 0; type2insert.length < 9; i++) {
+            if (type2insert.length != 9) {
                 type2insert += " ";
             }
         }
