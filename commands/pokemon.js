@@ -8,86 +8,54 @@ const NEED_FORM_ERROR = DEFAULT_ERROR + "\n*(If you wish to see a pokemon's spec
 const COLOR_MAP = new Map([["red", [255, 0, 0]], ["blue", [0, 0, 255]], ["yellow", [255, 247, 0]], ["green", [0, 255, 0]], ["black", [0, 0, 0]], ["brown", [140, 90, 40]], ["purple", [200, 0, 255]], ["gray", [120, 120, 120]], ["white", [254, 254, 254]], ["pink", [255, 180, 220]]])
 
 exports.getDexEntry = function (name, channel) {
-    P.getPokemonSpeciesByName(name)
-        .then(function (pokemon) {
-            //Get all the necessary pokemon values
-            var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
-            var pkmnId = pokemon.id;
-            var pkmnName = proper.properCase(pokemon.name);
-            var pkmnColor = pokemon.color.name;
-            P.getPokemonByName(pokemon.varieties[0].pokemon.name)
-                .then(function (specificPokemon) {
-                    var pkmnHeight = specificPokemon.height / 10; //Height in metres
-                    var pkmnWeight = specificPokemon.weight / 10; //Weight in kilograms
-                    var pkmnImage = specificPokemon.sprites.front_default;
-                    //Pokemon's type(s) is an array with objects in reverse order
-                    var pkmnTypes = [];
-                    for (var i = 0; i < specificPokemon.types.length; i++) {
-                        pkmnTypes[i] = proper.properCase(specificPokemon.types[i].type.name);
-                    }
-                    pkmnTypes = pkmnTypes.reverse().join("/");
-                    //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
-                    var pkmnAbilities = [];
-                    var pkmnHiddenAbility = "None";
-                    for (var i = 0; i < specificPokemon.abilities.length; i++) {
-                        if (!specificPokemon.abilities[i].is_hidden) {
-                            pkmnAbilities[i] = proper.properCase(specificPokemon.abilities[i].ability.name);
-                        } else {
-                            pkmnHiddenAbility = proper.properCase(specificPokemon.abilities[i].ability.name);
-                        }
-                    }
-                    pkmnAbilities = pkmnAbilities.filter(function (i) {
-                        return i != null;
-                    });
-                    pkmnAbilities = pkmnAbilities.join("/");
-                    //Now we must format all the information correctly in an embed to send
+    P.getPokemonByName(name)
+        .then(function (specificPokemon) {
+            var pkmnName = proper.properCase(specificPokemon.name);
+            var pkmnHeight = specificPokemon.height / 10; //Height in metres
+            var pkmnWeight = specificPokemon.weight / 10; //Weight in kilograms
+            var pkmnImage = specificPokemon.sprites.front_default;
+            //Pokemon's type(s) is an array with objects in reverse order
+            var pkmnTypes = [];
+            for (var i = 0; i < specificPokemon.types.length; i++) {
+                pkmnTypes[i] = proper.properCase(specificPokemon.types[i].type.name);
+            }
+            pkmnTypes = pkmnTypes.reverse().join("/");
+            //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
+            var pkmnAbilities = [];
+            var pkmnHiddenAbility = "None";
+            for (var i = 0; i < specificPokemon.abilities.length; i++) {
+                if (!specificPokemon.abilities[i].is_hidden) {
+                    pkmnAbilities[i] = proper.properCase(specificPokemon.abilities[i].ability.name);
+                } else {
+                    pkmnHiddenAbility = proper.properCase(specificPokemon.abilities[i].ability.name);
+                }
+            }
+            pkmnAbilities = pkmnAbilities.filter(function (i) {
+                return i != null;
+            });
+            pkmnAbilities = pkmnAbilities.join("/");
+            P.getPokemonSpeciesByName(specificPokemon.species.name)
+                .then(function (pokemon) {
+                    var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
+                    var pkmnId = pokemon.id;
+                    var pkmnColor = pokemon.color.name;
+                    //Now that we have all the data, send it off!
                     channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor));
                 })
                 .catch(function (error) {
-                    channel.send('There was an ERROR', error);
-                });
+                    channel.send(DEFAULT_ERROR, error);
+                })
         })
         .catch(function () {
-            //Maybe the person wants to see a specific form of a pokemon?
-            P.getPokemonByName(name)
-                .then(function (specificPokemon) {
-                    var pkmnHeight = specificPokemon.height / 10; //Height in metres
-                    var pkmnWeight = specificPokemon.weight / 10; //Weight in kilograms
-                    var pkmnImage = specificPokemon.sprites.front_default;
-                    //Pokemon's type(s) is an array with objects in reverse order
-                    var pkmnTypes = [];
-                    for (var i = 0; i < specificPokemon.types.length; i++) {
-                        pkmnTypes[i] = proper.properCase(specificPokemon.types[i].type.name);
-                    }
-                    pkmnTypes = pkmnTypes.reverse().join("/");
-                    //Pokemon's abilit(y/ies) are also an array in reverse order than we'd like it
-                    var pkmnAbilities = [];
-                    var pkmnHiddenAbility = "None";
-                    for (var i = 0; i < specificPokemon.abilities.length; i++) {
-                        if (!specificPokemon.abilities[i].is_hidden) {
-                            pkmnAbilities[i] = proper.properCase(specificPokemon.abilities[i].ability.name);
-                        } else {
-                            pkmnHiddenAbility = proper.properCase(specificPokemon.abilities[i].ability.name);
-                        }
-                    }
-                    pkmnAbilities = pkmnAbilities.filter(function (i) {
-                        return i != null;
-                    });
-                    pkmnAbilities = pkmnAbilities.join("/");
-                    P.getPokemonSpeciesByName(specificPokemon.species.name)
-                        .then(function (pokemon) {
-                            var pkmnGenus = pokemon.genera[2].genus; //Index 2 of the genera array is the english translation
-                            var pkmnId = pokemon.id;
-                            var pkmnName = proper.properCase(pokemon.name);
-                            var pkmnColor = pokemon.color.name;
-                            //Now that we have all the data, send it off!
-                            channel.send(makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor));
-                        })
+            //Check if they wanted a specific form of a pokemon
+            P.getPokemonSpeciesByName(name)
+                .then(function (maybePokemon) {
+                    module.exports.getDexEntry(maybePokemon.varieties[0].pokemon.name, channel);
                 })
                 .catch(function (error) {
                     channel.send(NEED_FORM_ERROR, error);
                 })
-        });
+        })
 }
 
 exports.getPokemonId = function (name, channel) {
@@ -151,16 +119,7 @@ exports.getStats = function (name, channel) {
             //Pokemon might just be a generic species
             P.getPokemonSpeciesByName(name)
                 .then(function (maybePokemon) {
-                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
-                        .then(function (pokemon) {
-                            channel.send("Stats for **" + proper.properCase(pokemon.species.name) + "**:\n```HP \n" + drawStatBar(pokemon.stats[5].base_stat) +
-                                "\nAttack\n" + drawStatBar(pokemon.stats[4].base_stat) + "\nDefense\n" + drawStatBar(pokemon.stats[3].base_stat) +
-                                "\nSpecial Attack\n" + drawStatBar(pokemon.stats[2].base_stat) + "\nSpecial Defense\n" + drawStatBar(pokemon.stats[1].base_stat) +
-                                "\nSpeed\n" + drawStatBar(pokemon.stats[0].base_stat) + "```");
-                        })
-                        .catch(function (error) {
-                            channel.send(DEFAULT_ERROR, error);
-                        })
+                    module.exports.getStats(maybePokemon.varieties[0].pokemon.name, channel);
                 })
                 .catch(function (error) {
                     channel.send(NEED_FORM_ERROR, error);
@@ -178,14 +137,7 @@ exports.getHeight = function (name, channel) {
             //Check if just a pokemon name and not form was entered
             P.getPokemonSpeciesByName(name)
                 .then(function (maybePokemon) {
-                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
-                        .then(function (pokemon) {
-                            var height = pokemon.height / 10;   //Height in metres
-                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), height + " metres\n" + m2feet(height), pokemon.sprites.front_default));
-                        })
-                        .catch(function (error) {
-                            channel.send(DEFAULT_ERROR, error);
-                        })
+                    module.exports.getHeight(maybePokemon.varieties[0].pokemon.name, channel);
                 })
                 .catch(function (error) {
                     channel.send(NEED_FORM_ERROR, error);
@@ -203,14 +155,7 @@ exports.getWeight = function (name, channel) {
             //Check if just a pokemon name and not form was entered
             P.getPokemonSpeciesByName(name)
                 .then(function (maybePokemon) {
-                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
-                        .then(function (pokemon) {
-                            var weight = pokemon.weight / 10;   //Weight in kilograms
-                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), weight + " kg\n" + kg2lbs(weight) + " lbs", pokemon.sprites.front_default));
-                        })
-                        .catch(function (error) {
-                            channel.send(DEFAULT_ERROR, error);
-                        })
+                    module.exports.getWeight(maybePokemon.varieties[0].pokemon.name, channel);
                 })
                 .catch(function (error) {
                     channel.send(NEED_FORM_ERROR, error);
@@ -232,18 +177,7 @@ exports.getType = function (name, channel) {
             //Check if just a pokemon name and not form was entered
             P.getPokemonSpeciesByName(name)
                 .then(function (maybePokemon) {
-                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
-                        .then(function (pokemon) {
-                            var pkmnTypes = [];
-                            for (var i in pokemon.types) {
-                                pkmnTypes[i] = proper.properCase(pokemon.types[i].type.name);   //Types is an array of 1-2 items entered in reverse order
-                            }
-                            pkmnTypes = pkmnTypes.reverse().join("/");
-                            channel.send(twoLineEmbed(proper.properCase(pokemon.species.name), pkmnTypes, pokemon.sprites.front_default));
-                        })
-                        .catch(function (error) {
-                            channel.send(DEFAULT_ERROR, error);
-                        })
+                    module.exports.getType(maybePokemon.varieties[0].pokemon.name, channel);
                 })
                 .catch(function (error) {
                     channel.send(NEED_FORM_ERROR, error);
@@ -294,48 +228,7 @@ exports.getEffectiveness = function (name, channel) {
             //Check if just a pokemon name and not form was entered
             P.getPokemonSpeciesByName(name)
                 .then(function (maybePokemon) {
-                    P.getPokemonByName(maybePokemon.varieties[0].pokemon.name)
-                        .then(function (pokemon) {
-                            var typeEffectiveness = new Map([["normal", 1], ["fire", 1], ["water", 1], ["grass", 1], ["electric", 1], ["ice", 1], ["fighting", 1],
-                            ["poison", 1], ["ground", 1], ["flying", 1], ["psychic", 1], ["bug", 1], ["rock", 1], ["ghost", 1], ["dark", 1], ["dragon", 1],
-                            ["steel", 1], ["fairy", 1]]);
-                            //Figure out how many types the pokemon has first
-                            switch (true) {
-                                case (pokemon.types.length == 1):    //Pokemon only has one type
-                                    P.getTypeByName(pokemon.types[0].type.name)
-                                        .then(function (type) {
-                                            typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type.damage_relations.no_damage_from, type.damage_relations.half_damage_from, type.damage_relations.double_damage_from);
-                                            channel.send("Type effectiveness against **" + proper.properCase(pokemon.species.name) + "**\n" + listEffectiveness(typeEffectiveness));
-                                        })
-                                        .catch(function (error) {
-                                            channel.send(DEFAULT_ERROR, error);
-                                        })
-                                    break;
-                                case (pokemon.types.length == 2):    //Pokemon has two different types
-                                    P.getTypeByName(pokemon.types[0].type.name)
-                                        .then(function (type1) {
-                                            typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type1.damage_relations.no_damage_from, type1.damage_relations.half_damage_from, type1.damage_relations.double_damage_from);
-                                            P.getTypeByName(pokemon.types[1].type.name)
-                                                .then(function (type2) {
-                                                    typeEffectiveness = multiplyEffectiveness(typeEffectiveness, type2.damage_relations.no_damage_from, type2.damage_relations.half_damage_from, type2.damage_relations.double_damage_from);
-                                                    channel.send("Type effectiveness against **" + proper.properCase(pokemon.species.name) + "**\n" + listEffectiveness(typeEffectiveness));
-                                                })
-                                                .catch(function (error) {
-                                                    channel.send(DEFAULT_ERROR, error);
-                                                })
-                                        })
-                                        .catch(function (error) {
-                                            channel.send(DEFAULT_ERROR, error);
-                                        })
-                                    break;
-                                default:                            //This line should theoretically never run but just in case
-                                    channel.send(DEFAULT_ERROR);
-                                    break;
-                            }
-                        })
-                        .catch(function (error) {
-                            channel.send(DEFAULT_ERROR, error);
-                        })
+                    module.exports.getEffectiveness(maybePokemon.varieties[0].pokemon.name, channel);
                 })
                 .catch(function (error) {
                     channel.send(NEED_FORM_ERROR, error);
