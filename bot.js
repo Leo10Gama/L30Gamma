@@ -181,6 +181,10 @@ client.on('message', async msg => {
           case (commandsArray[1] == "egg" && commandsArray[2] == "group"):
             pokedex.getEggGroup(commandsArray[0], msg.channel);
             break;
+          //Determine if the pokemon can breed with another pokemon
+          case (commandsArray[1] == "breed" && commandsArray.length >= 3):
+            pokedex.canBreed(commandsArray[0], commandsArray[2], msg.channel);
+            break;
         }
         break;
     }

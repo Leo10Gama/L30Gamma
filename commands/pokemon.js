@@ -250,6 +250,33 @@ exports.getEggGroup = function (name, channel) {
         })
 }
 
+exports.canBreed = function (name1, name2, channel) {
+    P.getPokemonSpeciesByName(name1)
+        .then(function (pokemon1) {
+            P.getPokemonSpeciesByName(name2)
+                .then(function (pokemon2) {
+                    var eggGroups = new Set();
+                    //Put all the egg groups into a set
+                    for (var egg1 of pokemon1.egg_groups) {
+                        eggGroups.add(egg1.name);
+                    }
+                    for (var egg2 of pokemon2.egg_groups) {
+                        eggGroups.add(egg2.name);
+                    }
+                    ((eggGroups.size < (pokemon1.egg_groups.length + pokemon2.egg_groups.length) && !eggGroups.has("no-eggs"))  //The two pokemon share an egg group
+                        || (eggGroups.has("ditto") && !eggGroups.has("no-eggs") && eggGroups.size != 1)) ?                  //At most one pokemon is a ditto (2 dittos cannot breed)
+                        channel.send("**" + proper.properCase(pokemon1.name) + "** and **" + proper.properCase(pokemon2.name) + "** can breed!")
+                        : channel.send("**" + proper.properCase(pokemon1.name) + "** and **" + proper.properCase(pokemon2.name) + "** cannot breed");
+                })
+                .catch(function (error) {
+                    channel.send(DONT_ENTER_FORM_ERROR, error);
+                })
+        })
+        .catch(function (error) {
+            channel.send(DONT_ENTER_FORM_ERROR, error);
+        })
+}
+
 function makeEmbed(pkmnName, pkmnId, pkmnGenus, pkmnImage, pkmnTypes, pkmnHeight, pkmnWeight, pkmnAbilities, pkmnHiddenAbility, pkmnColor) {
     return new Discord.MessageEmbed()
         .setTitle(pkmnName)
