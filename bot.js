@@ -14,6 +14,7 @@ const fibonacci = require('./commands/fibonacci');
 const palindrome = require('./commands/palindrome');
 const weather = require('./commands/myWeather');
 const pokedex = require('./commands/pokemon');
+const roman = require('./commands/romanNums');
 
 module.exports.run = async (client, message, args) => { }
 
@@ -38,7 +39,7 @@ const commandHelp = [
   "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
   "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
   "Convert a sentence to pig latin",
-  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`egg group`\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`type`\n`type effectiveness`\n`weight`",
+  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`breed [pokemon]`\n`egg group`\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`type`\n`type effectiveness`\n`weight`",
   "I can hold some really good conversation if you want to talk with me for a while :3",
   "Enter a list of numbers and I'll sum them up for you",
   "Enter a city and I'll let you know what the weather there is like right now"];
@@ -186,6 +187,9 @@ client.on('message', async msg => {
             pokedex.canBreed(commandsArray[0], commandsArray[2], msg.channel);
             break;
         }
+        break;
+      case (commands.substr(0, 5).toLowerCase() == "roman"):
+        msg.channel.send(roman.toRoman(commands.slice(5).trim()));
         break;
     }
   }
