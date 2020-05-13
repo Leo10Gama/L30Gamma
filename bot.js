@@ -29,7 +29,7 @@ client.on('ready', () => {
 
 
 //Create global constants
-const commandList = ["cat", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "speak", "sum", "weather"];
+const commandList = ["cat", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "roman", "speak", "sum", "weather"];
 const commandHelp = [
   "I'll show you a picture of a cat! Follow up commands include:\n`list`\n`[the name of a cat from 'list']`",
   "I'll tell you the nth term of the fibonacci sequence",
@@ -40,6 +40,7 @@ const commandHelp = [
   "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
   "Convert a sentence to pig latin",
   "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`breed [pokemon]`\n`egg group`\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`type`\n`type effectiveness`\n`weight`",
+  "Enter a number between 1 and 3999 and I'll tell you the roman numeral for that number, or enter a roman numeral and I'll tell you which number it represents",
   "I can hold some really good conversation if you want to talk with me for a while :3",
   "Enter a list of numbers and I'll sum them up for you",
   "Enter a city and I'll let you know what the weather there is like right now"];
@@ -189,7 +190,7 @@ client.on('message', async msg => {
         }
         break;
       case (commands.substr(0, 5).toLowerCase() == "roman"):
-        msg.channel.send(roman.toRoman(commands.slice(5).trim()));
+        msg.channel.send(isNaN(commands.slice(5).trim()) ? roman.toStandard(commands.slice(5).trim().toUpperCase()) : roman.toRoman(commands.slice(5).trim()));
         break;
     }
   }
