@@ -15,6 +15,7 @@ const palindrome = require('./commands/palindrome');
 const weather = require('./commands/myWeather');
 const pokedex = require('./commands/pokemon');
 const roman = require('./commands/romanNums');
+const rng = require('./commands/rng');
 
 module.exports.run = async (client, message, args) => { }
 
@@ -189,8 +190,13 @@ client.on('message', async msg => {
             break;
         }
         break;
+      //Roman Numeral Command
       case (commands.substr(0, 5).toLowerCase() == "roman"):
         msg.channel.send(isNaN(commands.slice(5).trim()) ? roman.toStandard(commands.slice(5).trim().toUpperCase()) : roman.toRoman(commands.slice(5).trim()));
+        break;
+      //RNG Numbers commands
+      case (commands.substr(0,3).toLowerCase() == "rng"):
+        msg.channel.send(commands.slice(3).trim().substr(0,4).toLowerCase() == "coin" ? rng.flipCoin() : commands.slice(3).trim().substr(0,4).toLowerCase() == "dice" ? rng.rollDice(parseInt(commands.slice(3).trim().slice(4).trim())) : "Invalid command. Please enter either `coin` or `dice [integer]`");
         break;
     }
   }
