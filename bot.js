@@ -1,6 +1,7 @@
 // Run dotenv
 require('dotenv').config();
 
+const BOT_USER_ID = "546043647297060864"; //The user ID of the bot, for use sometimes
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const proper = require('./commands/properCase');
@@ -16,6 +17,7 @@ const weather = require('./commands/myWeather');
 const pokedex = require('./commands/pokemon');
 const roman = require('./commands/romanNums');
 const rng = require('./commands/rng');
+const myCollect = require('./commands/myCollect');
 
 module.exports.run = async (client, message, args) => { }
 
@@ -30,9 +32,10 @@ client.on('ready', () => {
 
 
 //Create global constants
-const commandList = ["cat", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "roman", "speak", "sum", "weather"];
+const commandList = ["cat", "collect", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "rng", "roman", "speak", "sum", "weather"];
 const commandHelp = [
   "I'll show you a picture of a cat! Follow up commands include:\n`list`\n`[the name of a cat from 'list']`",
+  "Mostly a practice command; enter a substring and for 10 seconds I will collect any messages sent that contain that substring",
   "I'll tell you the nth term of the fibonacci sequence",
   "Enter a city and I'll give you that city's 5-day forecast",
   "Well, I'm sure you know what this command does since you called it just now, huh",
@@ -41,6 +44,7 @@ const commandHelp = [
   "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
   "Convert a sentence to pig latin",
   "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`breed [pokemon]`\n`egg group`\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`type`\n`type effectiveness`\n`weight`",
+  "Follow up with either `coin` or `dice [integer]` and I'll either flip a coin or roll a dice with `[integer]` sides",
   "Enter a number between 1 and 3999 and I'll tell you the roman numeral for that number, or enter a roman numeral and I'll tell you which number it represents",
   "I can hold some really good conversation if you want to talk with me for a while :3",
   "Enter a list of numbers and I'll sum them up for you",
@@ -195,8 +199,13 @@ client.on('message', async msg => {
         msg.channel.send(isNaN(commands.slice(5).trim()) ? roman.toStandard(commands.slice(5).trim().toUpperCase()) : roman.toRoman(commands.slice(5).trim()));
         break;
       //RNG Numbers commands
-      case (commands.substr(0,3).toLowerCase() == "rng"):
-        msg.channel.send(commands.slice(3).trim().substr(0,4).toLowerCase() == "coin" ? rng.flipCoin() : commands.slice(3).trim().substr(0,4).toLowerCase() == "dice" ? rng.rollDice(parseInt(commands.slice(3).trim().slice(4).trim())) : "Invalid command. Please enter either `coin` or `dice [integer]`");
+      case (commands.substr(0, 3).toLowerCase() == "rng"):
+        msg.channel.send(commands.slice(3).trim().substr(0, 4).toLowerCase() == "coin" ? rng.flipCoin() : commands.slice(3).trim().substr(0, 4).toLowerCase() == "dice" ? rng.rollDice(parseInt(commands.slice(3).trim().slice(4).trim())) : "Invalid command. Please enter either `coin` or `dice [integer]`");
+        break;
+      //Collect command (mostly going to be used for testing message collectors)
+      case (commands.substr(0, 7).toLowerCase() == "collect"):
+        console.log("Passing command...");
+        myCollect.collectWithSubstring(commands.slice(7).trim(), msg.channel);
         break;
     }
   }
