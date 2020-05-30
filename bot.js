@@ -4,6 +4,7 @@ require('dotenv').config();
 const BOT_USER_ID = "546043647297060864"; //The user ID of the bot, for use sometimes
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const help = require('./commands/help');
 const proper = require('./commands/properCase');
 const speak = require('./commands/speak');
 const cat = require('./commands/cat');
@@ -29,26 +30,6 @@ client.on('ready', () => {
   //This is the wakeup message for my personal server so I can test
   client.channels.cache.get('694662666190323812').send("Nyaa~ waking up from a quick cat nap");
 });
-
-
-//Create global constants
-const commandList = ["cat", "collect", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "rng", "roman", "speak", "sum", "weather"];
-const commandHelp = [
-  "I'll show you a picture of a cat! Follow up commands include:\n`list`\n`[the name of a cat from 'list']`",
-  "Mostly a practice command; enter a substring and for 10 seconds I will collect any messages sent that contain that substring",
-  "I'll tell you the nth term of the fibonacci sequence",
-  "Enter a city and I'll give you that city's 5-day forecast",
-  "Well, I'm sure you know what this command does since you called it just now, huh",
-  "Do a basic math operation with the format `[number] [operation] [number]`. Operations include: `+, -, *, /, %, ^`",
-  "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
-  "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
-  "Convert a sentence to pig latin",
-  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`breed [pokemon]`\n`egg group`\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`type`\n`type effectiveness`\n`weight`",
-  "Follow up with either `coin` or `dice [integer]` and I'll either flip a coin or roll a dice with `[integer]` sides",
-  "Enter a number between 1 and 3999 and I'll tell you the roman numeral for that number, or enter a roman numeral and I'll tell you which number it represents",
-  "I can hold some really good conversation if you want to talk with me for a while :3",
-  "Enter a list of numbers and I'll sum them up for you",
-  "Enter a city and I'll let you know what the weather there is like right now"];
 
 //Bot commands to listen for messages
 client.on('message', async msg => {
@@ -91,14 +72,24 @@ client.on('message', async msg => {
       //Help command
       case (commands.substr(0, 4).toLowerCase() == "help"):
         commands = commands.slice(4).trim().toLowerCase();
+        //Display all commands
         if (commands == "") {
           var returnValue = "Here's all the things I can do! If you'd like a more detailed explanation on how to use a specific command, type `g.help [command]`\n";
-          for (var i = 0; i < commandList.length; i++) {
-            returnValue += "`" + commandList[i] + "`\n";
+          for (var i of help) {
+            returnValue += "`" + i.keyword + "`\n";
           }
           msg.channel.send(returnValue);
-        } else if (commandList.indexOf(commands > -1)) {
-          msg.channel.send(commandHelp[commandList.indexOf(commands)]);
+        } else {
+          //Display the properties of a single command
+          var searchTerm = commands;
+          var flag = false;
+          for (var i of help) {
+            if(i.keyword == searchTerm) {
+              msg.channel.send(i.description + "\nInputs:\n`" + i.input.join("`\n`") + "`");
+              flag = true;
+            }
+          }
+          if(!flag) msg.channel.send("Invalid command. Check the full list of my commands with `g.help`");
         }
         break;
 
