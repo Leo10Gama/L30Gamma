@@ -204,8 +204,7 @@ client.on('message', async msg => {
         break;
       //Collect command (mostly going to be used for testing message collectors)
       case (commands.substr(0, 7).toLowerCase() == "collect"):
-        console.log("Passing command...");
-        myCollect.collectWithSubstring(commands.slice(7).trim(), msg.channel);
+        isNaN(commands.slice(7).trim()) ? myCollect.collectWithSubstring(commands.slice(7).trim(), msg.channel) : myCollect.collectAmount(msg.author.id, parseInt(commands.slice(7).trim()), msg.channel);
         break;
     }
   }
