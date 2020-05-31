@@ -1,5 +1,12 @@
 [
     {
+        "keyword": "blackjack",
+        "description": "Play a game of Blackjack against me! If you're inactive for one minute, the game will terminate",
+        "input": [
+            "g.blackjack"
+        ]
+    },
+    {
         "keyword": "cat",
         "description": "I'll show you a picture of a cat!",
         "input": [

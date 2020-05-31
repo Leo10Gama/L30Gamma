@@ -19,6 +19,7 @@ const pokedex = require('./commands/pokemon');
 const roman = require('./commands/romanNums');
 const rng = require('./commands/rng');
 const myCollect = require('./commands/myCollect');
+const blackjack = require('./commands/blackjack');
 
 module.exports.run = async (client, message, args) => { }
 
@@ -84,12 +85,12 @@ client.on('message', async msg => {
           var searchTerm = commands;
           var flag = false;
           for (var i of help) {
-            if(i.keyword == searchTerm) {
+            if (i.keyword == searchTerm) {
               msg.channel.send(i.description + "\nInputs:\n`" + i.input.join("`\n`") + "`");
               flag = true;
             }
           }
-          if(!flag) msg.channel.send("Invalid command. Check the full list of my commands with `g.help`");
+          if (!flag) msg.channel.send("Invalid command. Check the full list of my commands with `g.help`");
         }
         break;
 
@@ -196,6 +197,10 @@ client.on('message', async msg => {
       //Collect command (mostly going to be used for testing message collectors)
       case (commands.substr(0, 7).toLowerCase() == "collect"):
         isNaN(commands.slice(7).trim()) ? myCollect.collectWithSubstring(commands.slice(7).trim(), msg.channel) : myCollect.collectAmount(msg.author.id, parseInt(commands.slice(7).trim()), msg.channel);
+        break;
+      //Blackjack command
+      case (commands.substr(0, 9).toLowerCase() == "blackjack"):
+        blackjack.startGame(msg.author.id, msg.channel);
         break;
     }
   }
