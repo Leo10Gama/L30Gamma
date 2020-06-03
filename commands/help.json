@@ -1,0 +1,114 @@
+[
+    {
+        "keyword": "blackjack",
+        "description": "Play a game of Blackjack against me! If you're inactive for one minute, the game will terminate",
+        "input": [
+            "g.blackjack"
+        ]
+    },
+    {
+        "keyword": "cat",
+        "description": "I'll show you a picture of a cat!",
+        "input": [
+            "g.cat", "g.cat list", "g.cat [cat name]"
+        ]
+    },
+    {
+        "keyword": "collect",
+        "description": "Mostly a practice command; enter a substring and for 10 seconds I will collect any messages sent that contain that substring, or enter a number and I'll collect that many messages from you for 60 seconds",
+        "input": [
+            "g.collect [string/char]", "g.collect [integer]"
+        ]
+    },
+    {
+        "keyword": "fibonacci",
+        "description": "I'll tell you the nth term of the fibonacci sequence",
+        "input": [
+            "g.fibonacci [integer]"
+        ]
+    },
+    {
+        "keyword": "forecast",
+        "description": "Enter a city and I'll give you that city's 5-day forecast",
+        "input": [
+            "g.forecast [city]"
+        ]
+    },
+    {
+        "keyword": "help",
+        "description": "Well, I'm sure you know what this command does since you called it just now, huh",
+        "input": [
+            "g.help", "g.help [command]"
+        ]
+    },
+    {
+        "keyword": "math",
+        "description": "Do a basic math operation! These operations include: `+, -, *, /, %, ^`",
+        "input": [
+            "g.math [number] [operation] [number]"
+        ]
+    },
+    {
+        "keyword": "molarmass",
+        "description": "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
+        "input": [
+            "g.molarmass [compound]"
+        ]
+    },
+    {
+        "keyword": "palindrome",
+        "description": "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
+        "input": [
+            "g.palindrome [string]"
+        ]
+    },
+    {
+        "keyword": "piglatin",
+        "description": "Convert a sentence to pig latin",
+        "input": [
+            "g.piglatin [string]"
+        ]
+    },
+    {
+        "keyword": "pokemon",
+        "description": "Enter the name of a Pokemon and I'll give you information on that Pokemon! The information I give you can be specified with subcommands",
+        "input": [
+            "g.pokemon [pokemon]", "g.pokemon [pokemon1] breed [pokemon2]", "g.pokemon [pokemon] egg group", "g.pokemon [pokemon] forms", "g.pokemon [pokemon] height", "g.pokemon [pokemon] id", "g.pokemon [pokemon] (info/flavor text/flavour text)", "g.pokemon [pokemon] stats", "g.pokemon [pokemon] type", "g.pokemon [pokemon] type effectiveness", "g.pokemon [pokemon] weight"
+        ]
+    },
+    {
+        "keyword": "rng",
+        "description": "Random number generator. Your catch-all command for any sort of random decisions",
+        "input": [
+            "g.rng coin", "g.rng dice [integer]"
+        ]
+    },
+    {
+        "keyword": "roman",
+        "description": "Enter a number between 1 and 3999 and I'll tell you the roman numeral for that number, or enter a roman numeral and I'll tell you which number it represents",
+        "input": [
+            "g.roman [integer]", "g.roman [roman numeral]"
+        ]
+    },
+    {
+        "keyword": "speak",
+        "description": "I can hold some really good conversation if you want to talk with me for a while :3",
+        "input": [
+            "g.speak"
+        ]
+    },
+    {
+        "keyword": "sum",
+        "description": "Enter a list of numbers and I'll sum them up for you",
+        "input": [
+            "g.sum [number] [number] [number] ..."
+        ]
+    },
+    {
+        "keyword": "weather",
+        "description": "Enter a city and I'll let you know what the weather there is like right now",
+        "input": [
+            "g.weather [city]"
+        ]
+    }
+]

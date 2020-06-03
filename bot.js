@@ -1,8 +1,10 @@
 // Run dotenv
 require('dotenv').config();
 
+const BOT_USER_ID = "546043647297060864"; //The user ID of the bot, for use sometimes
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const help = require('./commands/help');
 const proper = require('./commands/properCase');
 const speak = require('./commands/speak');
 const cat = require('./commands/cat');
@@ -15,6 +17,9 @@ const palindrome = require('./commands/palindrome');
 const weather = require('./commands/myWeather');
 const pokedex = require('./commands/pokemon');
 const roman = require('./commands/romanNums');
+const rng = require('./commands/rng');
+const myCollect = require('./commands/myCollect');
+const blackjack = require('./commands/blackjack');
 
 module.exports.run = async (client, message, args) => { }
 
@@ -26,24 +31,6 @@ client.on('ready', () => {
   //This is the wakeup message for my personal server so I can test
   client.channels.cache.get('694662666190323812').send("Nyaa~ waking up from a quick cat nap");
 });
-
-
-//Create global constants
-const commandList = ["cat", "fibonacci", "forecast", "help", "math", "molarmass", "palindrome", "piglatin", "pokemon", "roman", "speak", "sum", "weather"];
-const commandHelp = [
-  "I'll show you a picture of a cat! Follow up commands include:\n`list`\n`[the name of a cat from 'list']`",
-  "I'll tell you the nth term of the fibonacci sequence",
-  "Enter a city and I'll give you that city's 5-day forecast",
-  "Well, I'm sure you know what this command does since you called it just now, huh",
-  "Do a basic math operation with the format `[number] [operation] [number]`. Operations include: `+, -, *, /, %, ^`",
-  "Find the molar mass of a chemical compound! Please be sure to enter with proper capital characters and no charges!!",
-  "Enter a word and see if it's a palindrome! (spelt the same forwards and backwards)",
-  "Convert a sentence to pig latin",
-  "Enter the name of a Pokemon and I'll give you information on that Pokemon! After typing the name of a pokemon, you can follow up with one of the following:\n`breed [pokemon]`\n`egg group`\n`forms`\n`height`\n`id`\n`info` or `flavor text` or `flavour text`\n`stats`\n`type`\n`type effectiveness`\n`weight`",
-  "Enter a number between 1 and 3999 and I'll tell you the roman numeral for that number, or enter a roman numeral and I'll tell you which number it represents",
-  "I can hold some really good conversation if you want to talk with me for a while :3",
-  "Enter a list of numbers and I'll sum them up for you",
-  "Enter a city and I'll let you know what the weather there is like right now"];
 
 //Bot commands to listen for messages
 client.on('message', async msg => {
@@ -86,14 +73,24 @@ client.on('message', async msg => {
       //Help command
       case (commands.substr(0, 4).toLowerCase() == "help"):
         commands = commands.slice(4).trim().toLowerCase();
+        //Display all commands
         if (commands == "") {
           var returnValue = "Here's all the things I can do! If you'd like a more detailed explanation on how to use a specific command, type `g.help [command]`\n";
-          for (var i = 0; i < commandList.length; i++) {
-            returnValue += "`" + commandList[i] + "`\n";
+          for (var i of help) {
+            returnValue += "`" + i.keyword + "`\n";
           }
           msg.channel.send(returnValue);
-        } else if (commandList.indexOf(commands > -1)) {
-          msg.channel.send(commandHelp[commandList.indexOf(commands)]);
+        } else {
+          //Display the properties of a single command
+          var searchTerm = commands;
+          var flag = false;
+          for (var i of help) {
+            if (i.keyword == searchTerm) {
+              msg.channel.send(i.description + "\nInputs:\n`" + i.input.join("`\n`") + "`");
+              flag = true;
+            }
+          }
+          if (!flag) msg.channel.send("Invalid command. Check the full list of my commands with `g.help`");
         }
         break;
 
@@ -189,8 +186,21 @@ client.on('message', async msg => {
             break;
         }
         break;
+      //Roman Numeral Command
       case (commands.substr(0, 5).toLowerCase() == "roman"):
         msg.channel.send(isNaN(commands.slice(5).trim()) ? roman.toStandard(commands.slice(5).trim().toUpperCase()) : roman.toRoman(commands.slice(5).trim()));
+        break;
+      //RNG Numbers commands
+      case (commands.substr(0, 3).toLowerCase() == "rng"):
+        msg.channel.send(commands.slice(3).trim().substr(0, 4).toLowerCase() == "coin" ? rng.flipCoin() : commands.slice(3).trim().substr(0, 4).toLowerCase() == "dice" ? rng.rollDice(parseInt(commands.slice(3).trim().slice(4).trim())) : "Invalid command. Please enter either `coin` or `dice [integer]`");
+        break;
+      //Collect command (mostly going to be used for testing message collectors)
+      case (commands.substr(0, 7).toLowerCase() == "collect"):
+        isNaN(commands.slice(7).trim()) ? myCollect.collectWithSubstring(commands.slice(7).trim(), msg.channel) : myCollect.collectAmount(msg.author.id, parseInt(commands.slice(7).trim()), msg.channel);
+        break;
+      //Blackjack command
+      case (commands.substr(0, 9).toLowerCase() == "blackjack"):
+        blackjack.startGame(msg.author.id, msg.channel);
         break;
     }
   }
